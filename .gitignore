@@ -1,0 +1,6 @@
+/.cider-history
+/.nrepl-port
+/node_modules/
+/.shadow-cljs/
+target/
+/resources/js/
