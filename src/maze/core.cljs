@@ -4,7 +4,7 @@
 (defn- log [x]
   (.log js/console (clj->js x)))
 
-(def SIZE 500)
+(def SIZE 600)
 (def GRID 20)
 (def WALL_SIZE 2)
 (def CELL_SIZE (/ SIZE GRID))
@@ -48,30 +48,46 @@
   (set! (.-lineWidth ctx) WALL_SIZE)
   (set! (.-strokeStyle ctx) "#223")
   (.strokeRect ctx 0 0 SIZE SIZE)
-  (doseq [[[c1 c2] wall?] maze]
-    (when wall? (draw-wall ctx c1 c2))))
+  (doseq [[c1 edges] maze]
+    (doseq [[c2 wall?] edges]
+      (when wall? (draw-wall ctx c1 c2)))))
 
 ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
 ;; Maze
 
-(defn- new-maze
-  "A maze is a graph between cells, where the edges are a wall (boolean)."
+(defn- in-maze? [[x y]]
+  (and (< x GRID) (< y GRID)))
+
+(defn- add-edge [maze c1 c2]
+  (if (in-maze? c2)
+    (assoc-in maze [c1 c2] false)
+    maze))
+
+(defn- empty-maze
+  "A maze is a graph between cells, where the edges are a wall (boolean).
+  Example:
+    {[0 0] {[0 1] true}
+     [0 1] {[1 1] true}
+     [1 0] {[1 1] false}
+     [1 1] {}"
   []
-  {})
-
-(defn- assoc-wall [maze c1 c2]
-  (assoc maze [c1 c2] true))
-
-(defn- all-cells []
-  (mapcat #(map vector (repeat %) (range GRID)) (range GRID)))
+  (let [all-cells (mapcat #(map vector (repeat %) (range GRID))
+                          (range GRID))]
+    (reduce
+     (fn [maze [x y :as cell]]
+       (-> maze
+           (add-edge cell [(inc x) y])
+           (add-edge cell [x (inc y)])))
+     {} all-cells)))
 
 (defn- random-maze []
-  (reduce
-   (fn [maze [cell offset]]
-     (assoc-wall maze cell [(+ (first cell) (first offset))
-                            (+ (second cell) (second offset))]))
-   (new-maze)
-   (for [cell (all-cells)] [cell (rand-nth [[0 1] [1 0]])])))
+  (let [maze (empty-maze)]
+    (reduce-kv
+     (fn [maze cell walls]
+       (reduce-kv
+        #(assoc-in %1 [cell %2] (rand-nth [true false]))
+        maze walls))
+     maze maze)))
 
 (defn main! []
   (draw! ctx (random-maze)))
