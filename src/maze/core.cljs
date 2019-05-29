@@ -13,6 +13,9 @@
 (def ctx (init-canvas!))
 
 (def CELLS [#{:east :south} #{:east} #{:south} #{}])
+(set! (.-fillStyle ctx) "rgb(255,255,255)")
+(set! (.-lineWidth ctx) 2)
+(set! (.-strokeStyle ctx) "#223")
 
 (defn corners [x y]
   [[(* x CELL_SIZE) (* y CELL_SIZE)]
@@ -30,17 +33,13 @@
                  (line-to ctx [(* (inc x) CELL_SIZE) (* (inc y) CELL_SIZE)]))))
   (.stroke ctx))
 
-(defn draw! [ctx cells]
-  (set! (.-fillStyle ctx) "rgb(255,255,255)")
+(defn draw! [ctx maze]
   (.fillRect ctx 0 0 SIZE SIZE)
-
-  (set! (.-lineWidth ctx) 3)
-  (set! (.-strokeStyle ctx) "#223")
   (.strokeRect ctx 0 0 SIZE SIZE)
 
-  (doseq [x (range GRID)]
-    (doseq [y (range GRID)]
-      (draw-cell ctx x y (rand-nth CELLS)))))
+  (doseq [[x row] (map-indexed vector maze)]
+    (doseq [[y cell] ((map-indexed vector row))]
+      (draw-cell ctx x y cell))))
 
 (defn main! []
   (.log js/console "MAIN")
