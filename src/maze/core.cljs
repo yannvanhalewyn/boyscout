@@ -24,10 +24,6 @@
   (move-to ctx (first line))
   (line-to ctx (second line)))
 
-(set! (.-fillStyle ctx) "rgb(255,255,255)")
-(set! (.-lineWidth ctx) WALL_SIZE)
-(set! (.-strokeStyle ctx) "#223")
-
 (defn corners [[x y]]
   [[(* x       CELL_SIZE) (* y       CELL_SIZE)]
    [(* (inc x) CELL_SIZE) (* y       CELL_SIZE)]
@@ -42,7 +38,15 @@
   (.stroke ctx))
 
 (defn draw! [ctx maze]
+  (set! (.-fillStyle ctx) "rgb(255,255,255)")
   (.fillRect ctx 0 0 SIZE SIZE)
+  (set! (.-fillStyle ctx) "#5d5")
+  (.fillRect ctx 0 0 CELL_SIZE CELL_SIZE)
+  (set! (.-fillStyle ctx) "#d55")
+  (.fillRect ctx (- SIZE CELL_SIZE) (- SIZE CELL_SIZE) CELL_SIZE CELL_SIZE)
+
+  (set! (.-lineWidth ctx) WALL_SIZE)
+  (set! (.-strokeStyle ctx) "#223")
   (.strokeRect ctx 0 0 SIZE SIZE)
   (doseq [[[c1 c2] wall?] maze]
     (when wall? (draw-wall ctx c1 c2))))
