@@ -3,11 +3,8 @@
             [clojure.core.async :as a
              :refer-macros [go go-loop]]))
 
-(defn- log [x]
-  (.log js/console (clj->js x)))
-
 (def SIZE 600)
-(def GRID 10)
+(def GRID 3)
 (def WALL_SIZE 2)
 (def CELL_SIZE (/ SIZE GRID))
 
@@ -62,14 +59,14 @@
 (defn- in-maze? [[x y]]
   (and (< x GRID) (< y GRID)))
 
-(defn- add-edge [maze c1 c2]
+(defn- add-edge [maze c1 c2 wall?]
   (if (in-maze? c2)
-    (assoc-in maze [c1 c2] false)
+    (-> (assoc-in maze [c1 c2] wall?)
+        (assoc-in [c2 c1] wall?))
     maze))
 
 (defn- neighbors [maze cell]
-  (concat (keys (get maze cell))
-          (filter #(contains? (get maze %) cell) (keys maze))))
+  (keys (get maze cell)))
 
 (defn- empty-maze
   "A maze is a graph between cells, where the edges are a wall (boolean).
@@ -78,14 +75,14 @@
      [0 1] {[1 1] true}
      [1 0] {[1 1] false}
      [1 1] {}"
-  []
+  [& [all-walls?]]
   (let [all-cells (mapcat #(map vector (repeat %) (range GRID))
                           (range GRID))]
     (reduce
      (fn [maze [x y :as cell]]
        (-> maze
-           (add-edge cell [(inc x) y])
-           (add-edge cell [x (inc y)])))
+           (add-edge cell [(inc x) y] all-walls?)
+           (add-edge cell [x (inc y)] all-walls?)))
      {} all-cells)))
 
 (defn- random-maze []
@@ -97,36 +94,50 @@
         maze walls))
      maze maze)))
 
-(defn- depth-first [graph start {:keys [visit-fn neighbors-fn]}]
-  (loop [stack (vector start)
+(defn- depth-first
+  "Traverses a graph via depth first. Accepts a visit-fn and a
+  neighbors-fn to get the neighboring nodes given a certain node.
+
+  For drawing paths in a maze this implementation keeps a stack of
+  neighboring tuples `[from to]`, and calls the visit-fn with both,
+  where `to` is the currently visited node, and `from` is the node
+  which gave us that neighbor."
+  [graph start {:keys [visit-fn neighbors-fn]}]
+  (loop [stack (vector [nil start]) ;; [from to]
          visited? #{}]
     (if (empty? stack)
       (vec visited?)
-      (let [node (peek stack)
-            neighbors (neighbors-fn graph node)
-            new-stack (into [] (remove visited?) (into (pop stack) neighbors))]
-        (visit-fn node)
-        (if (visited? node)
-          (recur new-stack visited?)
-          (recur new-stack (conj visited? node)))))))
+      (let [[prev cur] (peek stack)
+            visited? (conj visited? cur)
+            neighbor-tuples (map #(vector cur %) (neighbors-fn graph cur))
+            new-stack (into [] (remove (comp visited? second))
+                            (into (pop stack) neighbor-tuples))]
+        (visit-fn prev cur new-stack)
+        (recur new-stack visited?)))))
 
 (comment
 
-  (def DRAW_TIMEOUT 100)
+  (def DRAW_TIMEOUT 1000)
 
-  (let [c (a/chan)]
-    (draw! ctx (random-maze))
+  (let [c (a/chan)
+        maze (atom (empty-maze true))]
+    (js/console.clear)
+    (draw! ctx @maze)
+
     (go-loop []
-      (if-let [cell (a/<! c)]
-        (do (fill-cell ctx "blue" cell)
-            (a/<! (a/timeout DRAW_TIMEOUT))
+      (if-let [[from to stack] (a/<! c)]
+        (do (swap! maze add-edge from to false)
+            (draw! ctx @maze)
+            (fill-cell ctx "blue" to)
+            (a/<! (a/timeout (or DRAW_TIMEOUT 100)))
             (recur))
-        (.log js/console "CLOSE")))
+        (do (draw! ctx @maze)
+            (.log js/console "CLOSE"))))
 
-    (depth-first (empty-maze) [0 0]
+    (depth-first @maze [0 0]
                  {:visit-fn
-                  (fn [cell]
-                    (a/put! c cell))
+                  (fn [from to stack]
+                    (a/put! c [from to stack]))
                   :neighbors-fn (comp (partial sort-by #(rand-int 100)) neighbors)})
 
     (a/close! c))
