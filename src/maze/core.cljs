@@ -4,7 +4,7 @@
              :refer-macros [go go-loop]]))
 
 (def SIZE 600)
-(def GRID 3)
+(def GRID 30)
 (def WALL_SIZE 2)
 (def CELL_SIZE (/ SIZE GRID))
 
@@ -60,7 +60,7 @@
   (and (< x GRID) (< y GRID)))
 
 (defn- add-edge [maze c1 c2 wall?]
-  (if (in-maze? c2)
+  (if (and c1 (in-maze? c2))
     (-> (assoc-in maze [c1 c2] wall?)
         (assoc-in [c2 c1] wall?))
     maze))
@@ -102,9 +102,10 @@
   neighboring tuples `[from to]`, and calls the visit-fn with both,
   where `to` is the currently visited node, and `from` is the node
   which gave us that neighbor."
-  [graph start {:keys [visit-fn neighbors-fn]}]
+  [graph start {:keys [visit-fn neighbors-fn accumulator]}]
   (loop [stack (vector [nil start]) ;; [from to]
-         visited? #{}]
+         visited? #{}
+         acc accumulator]
     (if (empty? stack)
       (vec visited?)
       (let [[prev cur] (peek stack)
@@ -112,37 +113,31 @@
             neighbor-tuples (map #(vector cur %) (neighbors-fn graph cur))
             new-stack (into [] (remove (comp visited? second))
                             (into (pop stack) neighbor-tuples))]
-        (visit-fn prev cur new-stack)
-        (recur new-stack visited?)))))
+        (recur new-stack visited? (visit-fn acc prev cur))))))
 
-(comment
-
-  (def DRAW_TIMEOUT 1000)
-
-  (let [c (a/chan)
-        maze (atom (empty-maze true))]
-    (js/console.clear)
-    (draw! ctx @maze)
-
-    (go-loop []
-      (if-let [[from to stack] (a/<! c)]
-        (do (swap! maze add-edge from to false)
-            (draw! ctx @maze)
-            (fill-cell ctx "blue" to)
-            (a/<! (a/timeout (or DRAW_TIMEOUT 100)))
-            (recur))
-        (do (draw! ctx @maze)
-            (.log js/console "CLOSE"))))
-
-    (depth-first @maze [0 0]
-                 {:visit-fn
-                  (fn [from to stack]
-                    (a/put! c [from to stack]))
-                  :neighbors-fn (comp (partial sort-by #(rand-int 100)) neighbors)})
-
-    (a/close! c))
-
-  )
+(def DRAW_TIMEOUT 5)
 
 (defn main! []
-  (draw! ctx (random-maze)))
+  (let [c (a/chan)
+        initial-maze (empty-maze true)]
+    (js/console.clear)
+    (draw! ctx initial-maze)
+
+    (go-loop []
+      (if-let [[maze from to] (a/<! c)]
+        (do (draw! ctx maze)
+            (fill-cell ctx "blue" to)
+            (a/<! (a/timeout DRAW_TIMEOUT))
+            (recur))
+        (.log js/console "CLOSE")))
+
+    (depth-first initial-maze [0 0]
+                 {:visit-fn
+                  (fn [maze from to]
+                    (let [new-maze (add-edge maze from to false)]
+                      (a/put! c [new-maze from to])
+                      new-maze))
+                  :neighbors-fn (comp (partial sort-by #(rand-int 100)) neighbors)
+                  :accumulator initial-maze})
+
+    (a/close! c)))
