@@ -1,5 +1,6 @@
 (ns maze.core
-  (:require [clojure.set :as set]
+  (:require [maze.utils :as u]
+            [clojure.set :as set]
             [clojure.core.async :as a
              :refer-macros [go go-loop]]))
 
@@ -39,6 +40,16 @@
 (defn- fill-cell [ctx color [x y :as cell]]
   (set! (.-fillStyle ctx) color)
   (.fillRect ctx (* x CELL_SIZE) (* y CELL_SIZE) CELL_SIZE CELL_SIZE))
+
+(defn- draw-dot [ctx color [x y :as cell]]
+  (let [x (+ (* x CELL_SIZE) (/ CELL_SIZE 2))
+        y (+ (* y CELL_SIZE) (/ CELL_SIZE 2))
+        radius (int (/ CELL_SIZE 4))]
+    (set! (.-fillStyle ctx) color)
+    (.beginPath ctx)
+    (.arc ctx x y radius 0 (* 2 Math/PI))
+    (.closePath ctx)
+    (.fill ctx)))
 
 (declare neighbors)
 
@@ -111,29 +122,74 @@
                             (into (pop stack) neighbor-tuples))]
         (recur new-stack visited? (visit-fn acc prev cur))))))
 
+;; Prim
+(comment
+
+  (def c (a/chan))
+
+  (go-loop []
+    (if-let [{:keys [maze connected path cur] :as v} (a/<! c)]
+      (do (draw! ctx maze)
+          #_(doseq [cell connected]
+              (draw-dot ctx "green" cell))
+          #_(doseq [cell path]
+              (draw-dot ctx "orange" cell))
+          (draw-dot ctx "blue" cur)
+          (a/<! (a/timeout 5))
+          (recur))
+      (.log js/console "CLOSE")))
+
+  (loop [maze (empty-maze)
+         connected? #{[0 0]}
+         path #{[0 0]}]
+    (.clear js/console)
+    (if (empty? path)
+      maze
+      (let [cur (rand-nth (vec path))
+            [connected orphans] (u/split-by connected? (neighbors maze cur))
+            connect-to (and (seq connected) (rand-nth connected))
+            new-path (disj (apply conj path orphans) cur)
+            new-maze (if connect-to (add-path maze cur connect-to) maze)
+            new-connected? (conj connected? cur connect-to)]
+        (a/put! c {:connected new-connected?
+                   :path path
+                   :maze new-maze
+                   :cur cur
+                   :connect-to connect-to
+                   :conn-neighbors connected
+                   :orphan-neighbors orphans})
+        (recur new-maze
+               (conj connected? cur connect-to)
+               new-path))))
+
+  (a/close! c)
+
+  (.clear js/console)
+
+  )
+
 (def DRAW_TIMEOUT 10)
 
 (defn main! []
-  (let [c (a/chan)
-        initial-maze (empty-maze)]
-    (js/console.clear)
-    (draw! ctx initial-maze)
+  #_(let [c (a/chan)
+          initial-maze (empty-maze)]
+      (draw! ctx initial-maze)
 
-    (go-loop []
-      (if-let [[maze from to] (a/<! c)]
-        (do (draw! ctx maze)
-            (fill-cell ctx "blue" to)
-            (a/<! (a/timeout DRAW_TIMEOUT))
-            (recur))
-        (.log js/console "CLOSE")))
+      (go-loop []
+        (if-let [[maze from to] (a/<! c)]
+          (do (draw! ctx maze)
+              (fill-cell ctx "blue" to)
+              (a/<! (a/timeout DRAW_TIMEOUT))
+              (recur))
+          (.log js/console "CLOSE")))
 
-    (depth-first initial-maze [0 0]
-                 {:visit-fn
-                  (fn [maze from to]
-                    (let [new-maze (add-path maze from to)]
-                      (a/put! c [new-maze from to])
-                      new-maze))
-                  :neighbors-fn (comp (partial sort-by #(rand-int 100)) neighbors)
-                  :accumulator initial-maze})
+      (depth-first initial-maze [0 0]
+                   {:visit-fn
+                    (fn [maze from to]
+                      (let [new-maze (add-path maze from to)]
+                        (a/put! c [new-maze from to])
+                        new-maze))
+                    :neighbors-fn (comp (partial sort-by #(rand-int 100)) neighbors)
+                    :accumulator initial-maze})
 
-    (a/close! c)))
+      (a/close! c)))
