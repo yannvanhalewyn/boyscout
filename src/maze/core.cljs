@@ -4,7 +4,7 @@
              :refer-macros [go go-loop]]))
 
 (def SIZE 600)
-(def GRID 30)
+(def GRID 20)
 (def WALL_SIZE 2)
 (def CELL_SIZE (/ SIZE GRID))
 
@@ -40,6 +40,8 @@
   (set! (.-fillStyle ctx) color)
   (.fillRect ctx (* x CELL_SIZE) (* y CELL_SIZE) CELL_SIZE CELL_SIZE))
 
+(declare neighbors)
+
 (defn draw! [ctx maze]
   (set! (.-fillStyle ctx) "rgb(255,255,255)")
   (.fillRect ctx 0 0 SIZE SIZE)
@@ -50,49 +52,43 @@
   (set! (.-strokeStyle ctx) "#223")
   (.strokeRect ctx 0 0 SIZE SIZE)
   (doseq [[c1 edges] maze]
-    (doseq [[c2 wall?] edges]
-      (when wall? (draw-wall ctx c1 c2)))))
+    (doseq [c2 (neighbors maze c1)]
+      (when-not (contains? edges c2)
+        (draw-wall ctx c1 c2)))))
 
 ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
 ;; Maze
 
 (defn- in-maze? [[x y]]
-  (and (< x GRID) (< y GRID)))
+  (and (<= 0 x (dec GRID)) (<= 0 y (dec GRID))))
 
-(defn- add-edge [maze c1 c2 wall?]
-  (if (and c1 (in-maze? c2))
-    (-> (assoc-in maze [c1 c2] wall?)
-        (assoc-in [c2 c1] wall?))
-    maze))
+(defn- update-wall [f]
+  (fn [maze c1 c2]
+    (if (and c1 (in-maze? c2))
+      (-> maze
+          (update c1 f c2)
+          (update c2 f c1))
+      maze)))
 
-(defn- neighbors [maze cell]
-  (keys (get maze cell)))
+(def add-path (update-wall conj))
+(def remove-path (update-wall disj))
+
+(defn- neighbors [maze [x y]]
+  (filter in-maze? [[(inc x) y] [x (inc y)]
+                    [(dec x) y] [x (dec y)]]))
 
 (defn- empty-maze
-  "A maze is a graph between cells, where the edges are a wall (boolean).
+  "A maze is a graph between cells, where the edges are a path. Edges
+  are bidirectional, se they must appear twice.
   Example:
-    {[0 0] {[0 1] true}
-     [0 1] {[1 1] true}
-     [1 0] {[1 1] false}
-     [1 1] {}"
-  [& [all-walls?]]
-  (let [all-cells (mapcat #(map vector (repeat %) (range GRID))
-                          (range GRID))]
-    (reduce
-     (fn [maze [x y :as cell]]
-       (-> maze
-           (add-edge cell [(inc x) y] all-walls?)
-           (add-edge cell [x (inc y)] all-walls?)))
-     {} all-cells)))
-
-(defn- random-maze []
-  (let [maze (empty-maze)]
-    (reduce-kv
-     (fn [maze cell walls]
-       (reduce-kv
-        #(assoc-in %1 [cell %2] (rand-nth [true false]))
-        maze walls))
-     maze maze)))
+    {[0 0] #{[0 1] [1 0]}
+     [0 1] #{[0 0]}
+     [1 0] #{[0 0] [1 1]}
+     [1 1] #{[1 0]}"
+  []
+  (zipmap (mapcat #(map vector (repeat %) (range GRID))
+                  (range GRID))
+          (repeat #{})))
 
 (defn- depth-first
   "Traverses a graph via depth first. Accepts a visit-fn and a
@@ -115,11 +111,11 @@
                             (into (pop stack) neighbor-tuples))]
         (recur new-stack visited? (visit-fn acc prev cur))))))
 
-(def DRAW_TIMEOUT 5)
+(def DRAW_TIMEOUT 10)
 
 (defn main! []
   (let [c (a/chan)
-        initial-maze (empty-maze true)]
+        initial-maze (empty-maze)]
     (js/console.clear)
     (draw! ctx initial-maze)
 
@@ -134,7 +130,7 @@
     (depth-first initial-maze [0 0]
                  {:visit-fn
                   (fn [maze from to]
-                    (let [new-maze (add-edge maze from to false)]
+                    (let [new-maze (add-path maze from to)]
                       (a/put! c [new-maze from to])
                       new-maze))
                   :neighbors-fn (comp (partial sort-by #(rand-int 100)) neighbors)
