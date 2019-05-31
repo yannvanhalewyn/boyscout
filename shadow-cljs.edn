@@ -1,5 +1,6 @@
 {:source-paths ["src"]
- :dependencies [[binaryage/devtools "0.9.10"]]
+ :dependencies [[binaryage/devtools "0.9.10"]
+                [org.clojure/core.async "0.4.490"]]
  :builds {:app {:target :browser
                 :devtools {:http-port 8080
                            :http-root "resources"}
