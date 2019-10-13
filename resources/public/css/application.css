@@ -1,3 +1,62 @@
-.cell {
-  1px solid rgb(175, 216, 248);
+table {
+  border-collapse:collapse;
+}
+
+.cell{
+  width: 25px;
+  height: 25px;
+  border: 1px solid rgb(175, 216, 248);
+}
+
+.cell--start {
+  background: url(/img/triangletwo-right.svg) center no-repeat;
+  background-size: contain;
+  animation: grow 1s ease-out alternate;
+}
+
+.cell--end {
+  background: url(/img/circle.svg) center no-repeat;
+  background-size: contain;
+  animation: grow 1s ease-out alternate;
+}
+
+.cell--visited {
+  animation: flash 1.5s ease-out alternate forwards;
+}
+
+
+@keyframes flash {
+  0% {
+    transform: scale(.3);
+    background-color: rgba(0, 0, 66, 0.75);
+    border-radius: 100%;
+  }
+
+  50% {
+    background-color: rgba(17, 104, 217, 0.75);
+  }
+
+  75% {
+    transform: scale(1.2);
+    background-color: rgba(0, 217, 159, 0.75)
+  }
+
+  100% {
+    transform: scale(1.0);
+    background-color: rgba(0, 190, 218, 0.75);
+  }
+}
+
+@keyframes grow {
+  0% {
+    transform: scale(.3);
+  }
+
+  50% {
+    transform: scale(1.2);
+  }
+
+  100% {
+    transform: scale(1.0);
+  }
 }
