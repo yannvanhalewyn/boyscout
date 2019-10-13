@@ -3,4 +3,4 @@
 /node_modules/
 /.shadow-cljs/
 target/
-/resources/js/
+/resources/public/js/

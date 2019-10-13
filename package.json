@@ -1,0 +1,7 @@
+{
+  "dependencies": {
+    "create-react-class": "^15.6.3",
+    "react": "^16.10.2",
+    "react-dom": "^16.10.2"
+  }
+}
