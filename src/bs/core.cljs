@@ -1,6 +1,6 @@
-(ns maze.core
-  (:require [maze.board :as board]
-            [maze.algorithms :as alg]
+(ns bs.core
+  (:require [bs.board :as board]
+            [bs.algorithms :as alg]
             [reagent.core :as r]))
 
 ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
@@ -27,7 +27,8 @@
   (let [{:board/keys [source target] :as board} (:db/board @state)
         {::alg/keys [visitation-order shortest-path]} (alg/dijkstra board source target)]
     (if (empty? shortest-path)
-      (swap! state assoc :db/error "Target is unreachable")
+      (do (swap! state assoc :db/error "Target is unreachable")
+          (js/setTimeout #(swap! state dissoc :db/error) 2000))
       (do (animate* state visitation-order
                     :f board/mark-visited
                     :interval SPEED)

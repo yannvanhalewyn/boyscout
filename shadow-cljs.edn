@@ -7,13 +7,13 @@
                 :devtools {:http-port 8080
                            :http-root "resources/public"}
                 :asset-path "./js/app"
-                :modules {:main {:init-fn maze.core/main!
-                                 :after-load maze.core/render!}}}
+                :modules {:main {:init-fn bs.core/main!
+                                 :after-load bs.core/render!}}}
           :test {:target :browser-test
                  :test-dir "resources/public/js/test"
                  :devtools {:http-port 8606
                             :http-root "resources/public/js/test"}}
           :prod {:target :browser
                  :output-dir "target/cljs-advanced"
-                 :modules {:main {:init-fn maze.core/main!}}
+                 :modules {:main {:init-fn bs.core/main!}}
                  :compiler-options {:optimizations :advanced}}}}

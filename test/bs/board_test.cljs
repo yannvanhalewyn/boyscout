@@ -1,5 +1,5 @@
-(ns maze.board-test
-  (:require [maze.board :as sut]
+(ns bs.board-test
+  (:require [bs.board :as sut]
             [clojure.test :refer [deftest testing is]]))
 
 (deftest board

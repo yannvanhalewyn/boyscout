@@ -1,6 +1,6 @@
-(ns maze.algorithms
+(ns bs.algorithms
   (:require [clojure.set :as set]
-            [maze.board :as board]))
+            [bs.board :as board]))
 
 (defn- shortest-path
   "Walks back from the target node to the source node via the fastest
@@ -25,9 +25,9 @@
 (defn dijkstra
   "Traverses the board graph using the dijkstra algorithm. Will return
   a map with the order in which nodes were visited
-  `:maze.algorithms/visitation-order`, and a list of coordinates forming
+  `:bs.algorithms/visitation-order`, and a list of coordinates forming
   the fastest path, effectively being the found solution
-  `:maze.algorithms/shortest-path`"
+  `:bs.algorithms/shortest-path`"
   [board source target]
   (loop [unvisited (set (board/all-coordinates board))
          costs (assoc (zipmap unvisited (repeat {:cost js/Infinity}))
@@ -36,7 +36,7 @@
          result {::visitation-order []}]
     (if-not (contains? unvisited target)
       (when (and (seq (::visitation-order result))
-                 (not (= js/Infinity (get-in costs [cur :cost]))))
+                 (not (= js/Infinity (get-in costs [target :cost]))))
         (assoc result ::shortest-path (shortest-path costs target)))
       (let [unvisited-neighbors (set/intersection (board/neighbor-coords board cur)
                                                   unvisited)

@@ -1,5 +1,5 @@
-(ns maze.maze
-  (:require [maze.utils :as u]
+(ns bs.maze
+  (:require [bs.utils :as u]
             [clojure.set :as set]
             [clojure.core.async :as a
              :refer-macros [go go-loop]]))

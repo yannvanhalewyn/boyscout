@@ -1,4 +1,4 @@
-(ns maze.board
+(ns bs.board
   "This namespace provides a model of a board, which is represented as a
   bi-directional graph of cells. Walls can be added to the edges, and
   properties of the cell to the nodes. The data representation used

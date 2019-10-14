@@ -1,6 +1,6 @@
-(ns maze.algorithms-test
-  (:require [maze.algorithms :as sut]
-            [maze.board :as board]
+(ns bs.algorithms-test
+  (:require [bs.algorithms :as sut]
+            [bs.board :as board]
             [clojure.test :refer [deftest testing is]]))
 
 (deftest dijkstra-test

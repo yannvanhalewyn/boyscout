@@ -1,4 +1,4 @@
-(ns maze.utils)
+(ns bs.utils)
 
 (defn split-by
   "Returns a vector with two elements: the first is the collection of
