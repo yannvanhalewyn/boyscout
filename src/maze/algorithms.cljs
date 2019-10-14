@@ -40,7 +40,7 @@
                                                   unvisited)
             costs (recalculate-costs costs cur unvisited-neighbors)
             unvisited (disj unvisited cur)
-            next (first (sort-by (comp :cost costs) unvisited))]
+            next (apply min-key (comp :cost costs) unvisited)]
         (recur unvisited
                costs
                next
