@@ -32,6 +32,10 @@ table {
   animation: flash 1.5s ease-out alternate forwards;
 }
 
+.cell--path {
+  background-color: yellow;
+}
+
 
 @keyframes flash {
   0% {

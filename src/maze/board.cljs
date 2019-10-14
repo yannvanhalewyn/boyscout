@@ -42,3 +42,4 @@
 (def set-start    (partial mark-cell :cell/start?))
 (def set-end      (partial mark-cell :cell/end?))
 (def mark-visited (partial mark-cell :cell/visited?))
+(def mark-path    (partial mark-cell :cell/path?))
