@@ -16,14 +16,14 @@ table {
   border: 1px solid rgb(175, 216, 248);
 }
 
-.cell--start {
+.cell--source {
   background: url(../img/triangletwo-right.svg) center no-repeat;
   background-size: contain;
   animation: grow 1s ease-out alternate;
 }
 
-.cell--end {
-  background: url(../img/circle.svg) center no-repeat;
+.cell--target {
+  background: url(../img/target.svg) center no-repeat;
   background-size: contain;
   animation: grow 1s ease-out alternate;
 }

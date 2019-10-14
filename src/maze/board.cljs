@@ -1,45 +1,63 @@
 (ns maze.board
-  "This namespace provides a model of a board, which is a
+  "This namespace provides a model of a board, which is represented as a
   bi-directional graph of cells. Walls can be added to the edges, and
   properties of the cell to the nodes. The data representation used
   for this board might look like this:
 
   ``` clojure
-  {[0 0] {:cell/start true
-          :cell/neighbors #{[0 1] [1 0]}}
-   [0 1] {:cell/visited? true
-          :cell/neighbors #{[1 1] [0 0]}}
-   [1 0] {:cell/neighbors #{[0 0] [1 1]}}
-   [1 1] {:cell/end true
-          :cell/neighbors #{[0 1] [1 0]}}}
+  {:board/width 10
+   :board/height 10
+   :board/source [1 1]
+   :board/target [1 0]
+   :board/edges {[0 0] #{[0 1] [1 0]}
+                 [0 1] #{[1 1] [0 0]}
+                 [1 0] #{[0 0] [1 1]}
+                 [1 1] #{[0 1] [1 0]}}}
   ```"
   (:require [clojure.set :as set]))
 
 (defn make [width height]
   (let [coords (set (mapcat #(map vector (repeat %) (range height)) (range width)))]
-    (reduce
-     (fn [out [x y :as pos]]
-       (let [neighbors (set/intersection coords #{[x (dec y)]
-                                                  [(inc x) y]
-                                                  [x (inc y)]
-                                                  [(dec x) y]})]
-         (assoc out pos {:cell/neighbors neighbors})))
-     {:board/width width :board/height height}
-     coords)))
+    {:board/width width
+     :board/height height
+     :board/visited #{}
+     :board/path #{}
+     :board/edges
+     (reduce
+      (fn [out [x y :as pos]]
+        (let [neighbors (set/intersection coords #{[x (dec y)]
+                                                   [(inc x) y]
+                                                   [x (inc y)]
+                                                   [(dec x) y]})]
+          (assoc out pos neighbors)))
+      {} coords)}))
 
 (defn all-coordinates [board]
-  (keys (dissoc board :board/width :board/height)))
+  (keys (:board/edges board)))
 
 (defn neighbor-coords [board pos]
-  (get-in board [pos :cell/neighbors]))
+  (get-in board [:board/edges pos]))
 
-(defn- update-cell [board pos f & args]
-  (apply update board pos f args))
+(defn set-source [board pos]
+  (assoc board :board/source pos))
 
-(defn- mark-cell [k board pos]
-  (update-cell board pos assoc k true))
+(defn set-target [board pos]
+  (assoc board :board/target pos))
 
-(def set-start    (partial mark-cell :cell/start?))
-(def set-end      (partial mark-cell :cell/end?))
-(def mark-visited (partial mark-cell :cell/visited?))
-(def mark-path    (partial mark-cell :cell/path?))
+(defn mark-visited [board pos]
+  (update board :board/visited conj pos))
+
+(defn mark-path [board pos]
+  (update board :board/path conj pos))
+
+(defn source? [board pos]
+  (= pos (:board/source board)))
+
+(defn target? [board pos]
+  (= pos (:board/target board)))
+
+(defn visited? [board pos]
+  (contains? (:board/visited board) pos))
+
+(defn path? [board pos]
+  (contains? (:board/path board) pos))

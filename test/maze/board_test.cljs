@@ -10,6 +10,7 @@
               [2 0] [2 1]]
              (sut/all-coordinates board)))
       (is (= #{[0 1] [1 0] [2 1]} (sut/neighbor-coords board [1 1])))
-      (is (true? (get-in (sut/set-start board [0 1]) [[0 1] :cell/start?])))
-      (is (true? (get-in (sut/set-end board [1 1]) [[1 1] :cell/end?])))
-      (is (true? (get-in (sut/mark-visited board [0 0]) [[0 0] :cell/visited?]))))))
+      (is (true? (sut/visited? (sut/mark-visited board [1 0]) [1 0])))
+      (is (true? (sut/path? (sut/mark-path board [1 0]) [1 0])))
+      (is (true? (sut/source? (sut/set-source board [1 0]) [1 0])))
+      (is (true? (sut/target? (sut/set-target board [1 0]) [1 0]))))))
