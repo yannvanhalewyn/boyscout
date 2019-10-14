@@ -33,17 +33,15 @@
          costs (assoc (zipmap unvisited (repeat {:cost js/Infinity}))
                  source {:cost 0})
          cur source
-         result {::visitation-order []}]
+         visitation-order []]
     (if-not (contains? unvisited target)
-      (when (and (seq (::visitation-order result))
+      (when (and (seq visitation-order)
                  (not (= js/Infinity (get-in costs [target :cost]))))
-        (assoc result ::shortest-path (shortest-path costs target)))
+        {::visitation-order visitation-order
+         ::shortest-path (shortest-path costs target)})
       (let [unvisited-neighbors (set/intersection (board/neighbor-coords board cur)
                                                   unvisited)
             costs (recalculate-costs costs cur unvisited-neighbors)
             unvisited (disj unvisited cur)
             next (apply min-key (comp :cost costs) unvisited)]
-        (recur unvisited
-               costs
-               next
-               (update result ::visitation-order conj cur))))))
+        (recur unvisited costs next (conj visitation-order cur))))))
