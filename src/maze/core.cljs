@@ -6,6 +6,20 @@
 ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
 ;; Views
 
+(def SPEED 10)
+
+(defn- animate! [state]
+  (let [{:db/keys [board source target]} @state
+        result (alg/dijkstra board source target)]
+    (doseq [[i node] (map-indexed vector (::alg/visitation-order result))]
+      (js/setTimeout
+       #(swap! state update :db/board board/mark-visited node)
+       (* i SPEED)))
+    (doseq [[i node] (map-indexed vector (::alg/fastest-path result))]
+      (js/setTimeout
+       #(swap! state update :db/board board/mark-path node)
+       (+ (* i SPEED 4) (* (count (::alg/visitation-order result)) SPEED))))))
+
 (defn board-table [{:board/keys [width height] :as board}]
   [:table
    [:tbody
@@ -15,29 +29,27 @@
        (for [x (range width)
              :let [cell (get board [x y])]]
          ^{:key x}
-         [:td.cell {:class (cond (:cell/start? cell) "cell--start"
-                                 (:cell/end? cell) "cell--end"
-                                 (:cell/path? cell) "cell--path"
-                                 (:cell/visited? cell) "cell--visited")}])])]])
+         [:td.cell {:class (for [[k v] {:cell/start? "cell--start"
+                                        :cell/end? "cell--end"
+                                        :cell/path? "cell--path"
+                                        :cell/visited? "cell--visited"}
+                                 :when (get cell k)]
+                             v)}])])]])
 
-(defn root [{:keys [width height source target]}]
-  (let [board (-> (board/make width height)
-                  (board/set-start source)
-                  (board/set-end target))
-        result (alg/dijkstra board source target)]
-    [:<>
-     [:h1 "Pathfinder visualizer"]
-     [board-table (reduce
-                   board/mark-path
-                   (reduce board/mark-visited board (::alg/visitation-order result))
-                   (::alg/fastest-path result))]]))
+(defn root [state]
+  [:<>
+   [:h1 "Pathfinder visualizer"]
+   [:button {:on-click #(animate! state)} "Visualize!"]
+   [board-table (:db/board @state)]])
 
 (defn ^:dev/after-load render! []
-  (r/render [root {:width 66
-                   :height 20
-                   :source [10 10]
-                   :target [30 10]}]
-    (.getElementById js/document "app")))
+  (let [[src target] [[10 10] [30 3]]
+        state {:db/board (-> (board/make 66 20)
+                             (board/set-start src)
+                             (board/set-end target))
+               :db/source src
+               :db/target target}]
+    (r/render [root (r/atom state)] (.getElementById js/document "app"))))
 
 (defn main! []
   (render!))
