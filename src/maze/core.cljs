@@ -51,5 +51,4 @@
                :db/target target}]
     (r/render [root (r/atom state)] (.getElementById js/document "app"))))
 
-(defn main! []
-  (render!))
+(def main! render!)
