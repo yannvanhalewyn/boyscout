@@ -36,6 +36,9 @@ table {
   animation: glow 1.5s linear alternate forwards;
 }
 
+.cell--wall {
+  animation: blackhole 0.3s ease-out alternate forwards;
+}
 
 @keyframes flash {
   0% {
@@ -87,5 +90,22 @@ table {
   100% {
     transform: scale(1.0);
     background-color: rgb(255, 254, 106);
+  }
+}
+
+@keyframes blackhole {
+  0% {
+    transform: scale(.3);
+    background-color: rgb(12, 53, 71);
+  }
+
+  50% {
+    transform: scale(1.2);
+    background-color: rgb(12, 53, 71);
+  }
+
+  100% {
+    transform: scale(1.0);
+    background-color: rgb(12, 53, 71);
   }
 }

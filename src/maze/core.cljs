@@ -44,14 +44,17 @@
             {:class (for [[f v] {board/source? "cell--source"
                                  board/target? "cell--target"
                                  board/path? "cell--path"
-                                 board/visited? "cell--visited"}
+                                 board/visited? "cell--visited"
+                                 board/wall? "cell--wall"}
                           :when (f board [x y])]
                       v)
-             :on-mouse-down (cond
-                              (board/source? board pos)
-                              #(swap! state assoc :db/dragging :drag/source)
-                              (board/target? board pos)
-                              #(swap! state assoc :db/dragging :drag/target))
+             :on-mouse-down #(cond
+                               (board/source? board pos)
+                               (swap! state assoc :db/dragging :drag/source)
+                               (board/target? board pos)
+                               (swap! state assoc :db/dragging :drag/target)
+                               :else
+                               (swap! state update :db/board board/make-wall pos))
              :on-mouse-enter (when-let [f (case (:db/dragging st)
                                             :drag/source board/set-source
                                             :drag/target board/set-target nil)]

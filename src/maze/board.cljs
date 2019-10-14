@@ -16,6 +16,9 @@
   ```"
   (:require [clojure.set :as set]))
 
+;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
+;; Graph
+
 (defn make [width height]
   (let [coords (set (mapcat #(map vector (repeat %) (range height)) (range width)))]
     {:board/width width
@@ -38,6 +41,9 @@
 (defn neighbor-coords [board pos]
   (get-in board [:board/edges pos]))
 
+;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
+;; Mutations
+
 (defn set-source [board pos]
   (assoc board :board/source pos))
 
@@ -50,6 +56,15 @@
 (defn mark-path [board pos]
   (update board :board/path conj pos))
 
+(defn make-wall [board pos]
+  (let [neighbors (neighbor-coords board pos)]
+    (reduce
+     #(update-in %1 [:board/edges %2] disj pos)
+     (assoc-in board [:board/edges pos] #{}) neighbors)))
+
+;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
+;; Queries
+
 (defn source? [board pos]
   (= pos (:board/source board)))
 
@@ -61,3 +76,6 @@
 
 (defn path? [board pos]
   (contains? (:board/path board) pos))
+
+(defn wall? [board pos]
+  (empty? (get-in board [:board/edges pos])))
