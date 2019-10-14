@@ -4,21 +4,32 @@
             [reagent.core :as r]))
 
 ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
+;; DB
+
+(defn- new-db []
+  (let [[src target] [[10 10] [30 15]]]
+    {:db/board (-> (board/make 66 20)
+                   (board/set-start src)
+                   (board/set-end target))
+     :db/source src
+     :db/target target}))
+
+;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
 ;; Views
 
 (def SPEED 10)
 
 (defn- animate! [state]
   (let [{:db/keys [board source target]} @state
-        result (alg/dijkstra board source target)]
-    (doseq [[i node] (map-indexed vector (::alg/visitation-order result))]
+        {::alg/keys [visitation-order fastest-path]} (alg/dijkstra board source target)]
+    (doseq [[i node] (map-indexed vector visitation-order)]
       (js/setTimeout
        #(swap! state update :db/board board/mark-visited node)
        (* i SPEED)))
-    (doseq [[i node] (map-indexed vector (::alg/fastest-path result))]
+    (doseq [[i node] (map-indexed vector fastest-path)]
       (js/setTimeout
        #(swap! state update :db/board board/mark-path node)
-       (+ (* i SPEED 4) (* (count (::alg/visitation-order result)) SPEED))))))
+       (+ (* i SPEED 4) (* (count visitation-order) SPEED))))))
 
 (defn board-table [{:board/keys [width height] :as board}]
   [:table
@@ -40,15 +51,10 @@
   [:<>
    [:h1 "Pathfinder visualizer"]
    [:button {:on-click #(animate! state)} "Visualize!"]
+   [:button {:on-click #(reset! state (new-db))} "Reset"]
    [board-table (:db/board @state)]])
 
 (defn ^:dev/after-load render! []
-  (let [[src target] [[10 10] [30 3]]
-        state {:db/board (-> (board/make 66 20)
-                             (board/set-start src)
-                             (board/set-end target))
-               :db/source src
-               :db/target target}]
-    (r/render [root (r/atom state)] (.getElementById js/document "app"))))
+  (r/render [root (r/atom (new-db))] (.getElementById js/document "app")))
 
 (def main! render!)
