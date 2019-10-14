@@ -6,8 +6,13 @@ body {
   font-family: 'Roboto', sans-serif;
 }
 
+.u-error {
+  color: #e3224f;
+}
+
 table {
   border-collapse:collapse;
+  cursor: pointer;
 }
 
 .cell{

@@ -2,7 +2,7 @@
   (:require [clojure.set :as set]
             [maze.board :as board]))
 
-(defn- fastest-paths
+(defn- shortest-path
   "Walks back from the target node to the source node via the fastest
   parents in the costs map. To be used at the end of the dijkstra
   algorithm."
@@ -27,7 +27,7 @@
   a map with the order in which nodes were visited
   `:maze.algorithms/visitation-order`, and a list of coordinates forming
   the fastest path, effectively being the found solution
-  `:maze.algorithms/fastest-path`"
+  `:maze.algorithms/shortest-path`"
   [board source target]
   (loop [unvisited (set (board/all-coordinates board))
          costs (assoc (zipmap unvisited (repeat {:cost js/Infinity}))
@@ -35,7 +35,9 @@
          cur source
          result {::visitation-order []}]
     (if-not (contains? unvisited target)
-      (assoc result ::fastest-path (fastest-paths costs target))
+      (when (and (seq (::visitation-order result))
+                 (not (= js/Infinity (get-in costs [cur :cost]))))
+        (assoc result ::shortest-path (shortest-path costs target)))
       (let [unvisited-neighbors (set/intersection (board/neighbor-coords board cur)
                                                   unvisited)
             costs (recalculate-costs costs cur unvisited-neighbors)

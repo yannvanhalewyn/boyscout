@@ -17,17 +17,24 @@
 
 (def SPEED 10)
 
+(defn- animate* [state coll & {:keys [f offset interval]}]
+  (doseq [[i el] (map-indexed vector coll)]
+    (js/setTimeout
+     #(swap! state update :db/board f el)
+     (+ offset (* i interval)))))
+
 (defn- animate! [state]
   (let [{:board/keys [source target] :as board} (:db/board @state)
-        {::alg/keys [visitation-order fastest-path]} (alg/dijkstra board source target)]
-    (doseq [[i node] (map-indexed vector visitation-order)]
-      (js/setTimeout
-       #(swap! state update :db/board board/mark-visited node)
-       (* i SPEED)))
-    (doseq [[i node] (map-indexed vector fastest-path)]
-      (js/setTimeout
-       #(swap! state update :db/board board/mark-path node)
-       (+ (* i SPEED 4) (* (count visitation-order) SPEED))))))
+        {::alg/keys [visitation-order shortest-path]} (alg/dijkstra board source target)]
+    (if (empty? shortest-path)
+      (swap! state assoc :db/error "Target is unreachable")
+      (do (animate* state visitation-order
+                    :f board/mark-visited
+                    :interval SPEED)
+          (animate* state shortest-path
+                    :f board/mark-path
+                    :interval (* SPEED 4)
+                    :offset (* (count visitation-order) SPEED))))))
 
 (defn board-table [state]
   (let [st @state
@@ -54,11 +61,13 @@
                                (board/target? board pos)
                                (swap! state assoc :db/dragging :drag/target)
                                :else
-                               (swap! state update :db/board board/make-wall pos))
-             :on-mouse-enter (when-let [f (case (:db/dragging st)
-                                            :drag/source board/set-source
-                                            :drag/target board/set-target nil)]
-                               #(swap! state update :db/board f pos))
+                               (do (swap! state update :db/board board/make-wall pos)
+                                   (swap! state assoc :db/dragging :drag/wall)))
+             :on-mouse-enter #(when-let [f (case (:db/dragging st)
+                                             :drag/source board/set-source
+                                             :drag/target board/set-target
+                                             :drag/wall board/make-wall nil)]
+                                (swap! state update :db/board f pos))
              :on-mouse-up (when (:db/dragging st)
                             #(swap! state dissoc :db/dragging))}])])]]))
 
@@ -67,6 +76,8 @@
    [:h1 "Pathfinder visualizer"]
    [:button {:on-click #(animate! state)} "Visualize!"]
    [:button {:on-click #(reset! state (new-db))} "Reset"]
+   (when-let [e (:db/error @state)]
+     [:p.u-error e])
    [board-table state]])
 
 (defn ^:dev/after-load render! []
