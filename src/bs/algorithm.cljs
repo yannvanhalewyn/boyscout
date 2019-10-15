@@ -3,7 +3,11 @@
             [bs.algorithms.dijkstra :as dijkstra]
             [bs.algorithms.depth-first :as depth-first]))
 
-(def ALL [::dijkstra ::depth-first])
+(def ALL [{::key ::dijkstra    ::name "Dijkstra"}
+          {::key ::depth-first ::name "Depth First Search"}])
+
+(defn from-name [s]
+  (first (filter #(= s (::name %)) ALL)))
 
 (defmulti process
   "Traverses the board graph using a specified algorithm. Will return

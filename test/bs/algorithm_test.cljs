@@ -4,7 +4,7 @@
             [clojure.test :refer [deftest testing is]]))
 
 (deftest properties-test
-  (doseq [alg sut/ALL]
+  (doseq [alg (map ::sut/key sut/ALL)]
     (testing (str alg " won't have an answer when target is off the grid")
       (is (nil? (sut/process alg (board/make 4 4) [1 0] [10 10]))))
 

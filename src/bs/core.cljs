@@ -19,11 +19,16 @@
   (let [[src target] [[10 10] [30 15]]]
     {:db/board (-> (board/make 66 20)
                    (board/set-source src)
-                   (board/set-target target))}))
+                   (board/set-target target))
+     :db/current-alg (first alg/ALL)}))
 
 (defn- show-error! [state err]
   (swap! state assoc :db/error err)
   (js/setTimeout #(swap! state dissoc :db/error) 2000))
+
+(defn- current-algorithm-results [{:db/keys [board current-alg]}]
+  (alg/process (::alg/key current-alg) board
+               (:board/source board) (:board/target board)))
 
 (defn- update-board-from-algorithm [board result]
   (-> board
@@ -35,7 +40,7 @@
   animated, will recalculate the algorithm result."
   [state new-board]
   (if (seq (:board/path new-board))
-    (let [result (alg/process ::alg/dijkstra new-board (:board/source new-board) (:board/target new-board))]
+    (let [result (current-algorithm-results @state)]
       (swap! state assoc :db/board (update-board-from-algorithm new-board result)))
     (swap! state assoc :db/board new-board)))
 
@@ -59,8 +64,7 @@
       (* (count shortest-path) SPEED 4))))
 
 (defn- animate! [state]
-  (let [{:board/keys [source target] :as board} (:db/board @state)
-        {::alg/keys [shortest-path] :as result} (alg/process ::alg/dijkstra board source target)]
+  (let [{::alg/keys [shortest-path] :as result} (current-algorithm-results @state)]
     (if (empty? shortest-path)
       (show-error! state "Target is unreachable")
       (animate!* state result))))
@@ -113,6 +117,10 @@
 (defn root [state]
   [:<>
    [:h1 "Pathfinder visualizer"]
+   [:select {:on-change #(swap! state assoc :db/current-alg
+                                (alg/from-name (.. % -target -value)))}
+    (for [alg alg/ALL]
+      ^{:key (::alg/key alg)} [:option (::alg/name alg)])]
    [:button {:on-click #(animate! state)} "Visualize!"]
    [:button {:on-click #(reset! state (new-db))} "Reset"]
    (when-let [e (:db/error @state)]
