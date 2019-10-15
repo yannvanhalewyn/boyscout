@@ -8,8 +8,7 @@
                 :devtools {:http-port 8080
                            :http-root "resources/public"}
                 :asset-path "./js/app"
-                :modules {:main {:init-fn bs.core/main!
-                                 :after-load bs.core/render!}}}
+                :modules {:main {:init-fn bs.core/main!}}}
           :test {:target :browser-test
                  :test-dir "resources/public/js/test"
                  :devtools {:http-port 8081
