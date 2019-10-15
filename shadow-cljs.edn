@@ -11,7 +11,7 @@
                                  :after-load bs.core/render!}}}
           :test {:target :browser-test
                  :test-dir "resources/public/js/test"
-                 :devtools {:http-port 8606
+                 :devtools {:http-port 8081
                             :http-root "resources/public/js/test"}}
           :prod {:target :browser
                  :output-dir "target/cljs-advanced"

@@ -1,7 +1,11 @@
 {
+  "scripts": {
+    "watch": "shadow-cljs watch app test",
+    "build": "shadow-cljs release prod"
+  },
   "dependencies": {
     "create-react-class": "^15.6.3",
-    "react": "^16.10.2",
-    "react-dom": "^16.10.2"
+    "react": "^16.0.0",
+    "react-dom": "^16.9.0"
   }
 }
