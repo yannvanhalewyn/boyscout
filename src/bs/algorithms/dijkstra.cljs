@@ -1,9 +1,8 @@
-(ns bs.algorithms
-  (:require [bs.board :as board]
-            [bs.utils :as u]
+(ns bs.algorithms.dijkstra
+  (:require [bs.utils :as u]
             [tailrecursion.priority-map :refer [priority-map-keyfn]]))
 
-(defn- shortest-path
+(defn shortest-path
   "Walks back from the target node to the source node via the fastest
   parents in the costs map. To be used at the end of the dijkstra
   algorithm."
@@ -14,7 +13,7 @@
       (recur parent (conj result parent))
       result)))
 
-(defn dijkstra*
+(defn dijkstra
   "Computes single-source shortest path distances in a directed graph.
   Given a node n, (neighbor-cost-fn n) should return a map with the
   connected nodes to n as keys and their (non-negative) distance from
@@ -46,52 +45,3 @@
             (recur (merge-with (partial min-key :cost) (pop distances) neighbor-costs)
                    result))))
       result)))
-
-(defn dijkstra
-  "Traverses the board graph using the dijkstra algorithm. Will return
-  a map with the order in which nodes were visited
-  `:bs.algorithms/visitation-order`, and a list of coordinates forming
-  the fastest path, effectively being the found solution
-  `:bs.algorithms/shortest-path`"
-  [board source target]
-  (let [visitation-order (transient [])
-        neighbor-cost-fn (fn [pos]
-                           (conj! visitation-order pos)
-                           (if (= pos target)
-                             :dijkstra/done
-                             (zipmap (board/neighbor-coords board pos) (repeat 1))))
-        costs (dijkstra* source neighbor-cost-fn)
-        path (shortest-path costs target)]
-    (when (and (= source (first path)) (= target (last path)))
-      {::shortest-path path
-       ::visitation-order (persistent! visitation-order)})))
-
-(defn depth-first* [start neighbors-fn]
-  (loop [stack [start]
-         visited []]
-    (if (empty? stack)
-      visited
-      (let [cur (peek stack)
-            neighbors (neighbors-fn cur)
-            visited (conj visited cur)]
-        (if (= :depth-first/done neighbors)
-          visited
-          (recur (into (pop stack) (remove (set visited) neighbors)) visited))))))
-
-(defn depth-first [board source target]
-  (let [result (depth-first* source #(if (= % target)
-                                       :depth-first/done
-                                       (board/neighbor-coords board %)))]
-    (when (= target (last result))
-      {::shortest-path result
-       ::visitation-order result})))
-
-(comment
-  (let [b (board/make 66 20)]
-    (time (dijkstra* [0 0] #(zipmap (board/neighbor-coords b %) (repeat 1))))
-    (time (dijkstra b [0 0] [50 10])))
-
-  (let [b (board/make 10 10)]
-    (depth-first b [0 0] [0 5]))
-
-  )

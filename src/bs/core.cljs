@@ -1,6 +1,6 @@
 (ns bs.core
   (:require [bs.board :as board]
-            [bs.algorithms :as alg]
+            [bs.algorithm :as alg]
             [reagent.core :as r]))
 
 ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
@@ -35,7 +35,7 @@
   animated, will recalculate the algorithm result."
   [state new-board]
   (if (seq (:board/path new-board))
-    (let [result (alg/dijkstra new-board (:board/source new-board) (:board/target new-board))]
+    (let [result (alg/process ::alg/dijkstra new-board (:board/source new-board) (:board/target new-board))]
       (swap! state assoc :db/board (update-board-from-algorithm new-board result)))
     (swap! state assoc :db/board new-board)))
 
@@ -60,7 +60,7 @@
 
 (defn- animate! [state]
   (let [{:board/keys [source target] :as board} (:db/board @state)
-        {::alg/keys [shortest-path] :as result} (alg/dijkstra board source target)]
+        {::alg/keys [shortest-path] :as result} (alg/process ::alg/dijkstra board source target)]
     (if (empty? shortest-path)
       (show-error! state "Target is unreachable")
       (animate!* state result))))
