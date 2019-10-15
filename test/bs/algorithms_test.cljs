@@ -24,3 +24,23 @@
                     (board/make-wall [2 3])
                     (board/make-wall [3 2]))]
       (is (nil? (sut/dijkstra board [1 0] [3 3]))))))
+
+(deftest depth-first-test
+  (testing "Example from corner to corner"
+    (is (= {:bs.algorithms/shortest-path [[0 0] [1 0] [2 0] [2 1] [2 2]]
+            :bs.algorithms/visitation-order [[0 0] [1 0] [2 0] [2 1] [2 2]]}
+           (sut/depth-first (board/make 3 3) [0 0] [2 2]))))
+
+  (testing "Example between two other points"
+    (is (= {:bs.algorithms/shortest-path [[1 0] [2 0] [3 0] [3 1] [3 2] [3 3] [2 3]]
+            :bs.algorithms/visitation-order [[1 0] [2 0] [3 0] [3 1] [3 2] [3 3] [2 3]]}
+           (sut/depth-first (board/make 4 4) [1 0] [2 3]))))
+
+  (testing "It won't have an answer when target is off the grid"
+    (is (nil? (sut/depth-first (board/make 4 4) [1 0] [10 10]))))
+
+  (testing "It won't have an answer when the target is unreachable"
+    (let [board (-> (board/make 4 4)
+                    (board/make-wall [2 3])
+                    (board/make-wall [3 2]))]
+      (is (nil? (sut/depth-first board [1 0] [3 3]))))))

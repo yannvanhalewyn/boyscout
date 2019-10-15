@@ -66,9 +66,32 @@
       {::shortest-path path
        ::visitation-order (persistent! visitation-order)})))
 
+(defn depth-first* [start neighbors-fn]
+  (loop [stack [start]
+         visited []]
+    (if (empty? stack)
+      visited
+      (let [cur (peek stack)
+            neighbors (neighbors-fn cur)
+            visited (conj visited cur)]
+        (if (= :depth-first/done neighbors)
+          visited
+          (recur (into (pop stack) (remove (set visited) neighbors)) visited))))))
+
+(defn depth-first [board source target]
+  (let [result (depth-first* source #(if (= % target)
+                                       :depth-first/done
+                                       (board/neighbor-coords board %)))]
+    (when (= target (last result))
+      {::shortest-path result
+       ::visitation-order result})))
+
 (comment
   (let [b (board/make 66 20)]
     (time (dijkstra* [0 0] #(zipmap (board/neighbor-coords b %) (repeat 1))))
     (time (dijkstra b [0 0] [50 10])))
+
+  (let [b (board/make 10 10)]
+    (depth-first b [0 0] [0 5]))
 
   )
