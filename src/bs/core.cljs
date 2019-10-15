@@ -42,7 +42,7 @@
 ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
 ;; Views
 
-(def SPEED 10)
+(def SPEED 8)
 
 (defn- animate!* [state {::alg/keys [shortest-path visitation-order] :as alg-result}]
   (doseq [[i pos] (map-indexed vector visitation-order)]
@@ -67,7 +67,8 @@
 
 (defn board-table [state]
   (let [st @state
-        {:board/keys [width height] :as board} (:db/board st)]
+        {:board/keys [width height] :as board} (:db/board st)
+        added-walls (transient [])]
     [:table
      [:tbody
       (for [y (range height)]
@@ -91,13 +92,22 @@
                                (swap! state assoc :db/dragging type)
                                (when (= :drag/wall type)
                                  (swap! state update :db/board board/make-wall pos)))
-             :on-mouse-enter #(when-let [f (case (:db/dragging st)
-                                             :drag/source board/set-source
-                                             :drag/target board/set-target
-                                             :drag/wall board/make-wall nil)]
-                                (update-board! state (f (:db/board st) pos)))
-             :on-mouse-up #(when (:db/dragging st)
-                             (swap! state dissoc :db/dragging))}])])]]))
+             :on-mouse-enter (fn []
+                               (when-let [f (case (:db/dragging st)
+                                              :drag/source board/set-source
+                                              :drag/target board/set-target
+                                              nil)]
+                                 (update-board! state (f (:db/board st) pos)))
+                               ;; For react performance, don't swap in
+                               ;; every wall while dragging
+                               (when (= :drag/wall (:db/dragging st))
+                                 (add-class! (cell-id pos) "cell--wall-animated")
+                                 (conj! added-walls pos)))
+             :on-mouse-up (fn []
+                            (swap! state dissoc :db/dragging)
+                            (when (= :drag/wall (:db/dragging st))
+                              (update-board! state (reduce board/make-wall board
+                                                           (persistent! added-walls)))))}])])]]))
 
 
 (defn root [state]

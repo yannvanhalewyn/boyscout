@@ -60,10 +60,13 @@ table {
 }
 
 .cell--wall-animated {
+  border: none;
   animation: blackhole 0.3s ease-out alternate forwards;
+  animation-play-state: running;
 }
 
 .cell--wall {
+  border: none;
   background-color: rgb(12, 53, 71);
 }
 
