@@ -4,6 +4,15 @@
             [reagent.core :as r]))
 
 ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
+;; Helpers
+
+(defn- add-class! [id class]
+  (.add (.-classList (.getElementById js/document id)) class))
+
+(defn- cell-id [[x y]]
+  (str "cell-" x "-" y))
+
+;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
 ;; DB
 
 (defn- new-db []
@@ -12,30 +21,49 @@
                    (board/set-source src)
                    (board/set-target target))}))
 
+(defn- show-error! [state err]
+  (swap! state assoc :db/error err)
+  (js/setTimeout #(swap! state dissoc :db/error) 2000))
+
+(defn- update-board-from-algorithm [board result]
+  (-> board
+      (board/set-visited (::alg/visitation-order result))
+      (board/set-path (::alg/shortest-path result))))
+
+(defn- update-board!
+  "Swaps the state with a new board. When it already has been
+  animated, will recalculate the algorithm result."
+  [state new-board]
+  (if (seq (:board/path new-board))
+    (let [result (alg/dijkstra new-board (:board/source new-board) (:board/target new-board))]
+      (swap! state assoc :db/board (update-board-from-algorithm new-board result)))
+    (swap! state assoc :db/board new-board)))
+
 ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
 ;; Views
 
 (def SPEED 10)
 
-(defn- animate* [state coll & {:keys [f offset interval]}]
-  (doseq [[i el] (map-indexed vector coll)]
+(defn- animate!* [state {::alg/keys [shortest-path visitation-order] :as alg-result}]
+  (doseq [[i pos] (map-indexed vector visitation-order)]
     (js/setTimeout
-     #(swap! state update :db/board f el)
-     (+ offset (* i interval)))))
+     #(add-class! (cell-id pos) "cell--visited-animated")
+     (* i SPEED)))
+  (doseq [[i pos] (map-indexed vector shortest-path)]
+    (js/setTimeout
+     #(add-class! (cell-id pos) "cell--path-animated")
+     (+ (* (count visitation-order) SPEED) (* i SPEED 4))))
+  (js/setTimeout
+   #(swap! state update :db/board update-board-from-algorithm alg-result)
+   (+ (* (count visitation-order) SPEED)
+      (* (count shortest-path) SPEED 4))))
 
 (defn- animate! [state]
   (let [{:board/keys [source target] :as board} (:db/board @state)
-        {::alg/keys [visitation-order shortest-path]} (alg/dijkstra board source target)]
+        {::alg/keys [shortest-path] :as result} (alg/dijkstra board source target)]
     (if (empty? shortest-path)
-      (do (swap! state assoc :db/error "Target is unreachable")
-          (js/setTimeout #(swap! state dissoc :db/error) 2000))
-      (do (animate* state visitation-order
-                    :f board/mark-visited
-                    :interval SPEED)
-          (animate* state shortest-path
-                    :f board/mark-path
-                    :interval (* SPEED 4)
-                    :offset (* (count visitation-order) SPEED))))))
+      (show-error! state "Target is unreachable")
+      (animate!* state result))))
 
 (defn board-table [state]
   (let [st @state
@@ -49,7 +77,8 @@
                :let [pos [x y]]]
            ^{:key x}
            [:td.cell
-            {:class (for [[f v] {board/source? "cell--source"
+            {:id (cell-id pos)
+             :class (for [[f v] {board/source? "cell--source"
                                  board/target? "cell--target"
                                  board/path? "cell--path"
                                  board/visited? "cell--visited"
@@ -66,9 +95,10 @@
                                              :drag/source board/set-source
                                              :drag/target board/set-target
                                              :drag/wall board/make-wall nil)]
-                                (swap! state update :db/board f pos))
-             :on-mouse-up (when (:db/dragging st)
-                            #(swap! state dissoc :db/dragging))}])])]]))
+                                (update-board! state (f (:db/board st) pos)))
+             :on-mouse-up #(when (:db/dragging st)
+                             (swap! state dissoc :db/dragging))}])])]]))
+
 
 (defn root [state]
   [:<>

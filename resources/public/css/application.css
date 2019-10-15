@@ -15,14 +15,25 @@ table {
   cursor: pointer;
 }
 
-.cell{
+.cell {
   width: 25px;
   height: 25px;
   border: 1px solid rgb(175, 216, 248);
 }
 
+.cell--source-animated {
+  background: url(../img/triangletwo-right.svg) center no-repeat;
+  background-size: contain;
+  animation: grow 1s ease-out alternate;
+}
+
 .cell--source {
   background: url(../img/triangletwo-right.svg) center no-repeat;
+  background-size: contain;
+}
+
+.cell--target-animated {
+  background: url(../img/target.svg) center no-repeat;
   background-size: contain;
   animation: grow 1s ease-out alternate;
 }
@@ -30,19 +41,30 @@ table {
 .cell--target {
   background: url(../img/target.svg) center no-repeat;
   background-size: contain;
-  animation: grow 1s ease-out alternate;
 }
 
-.cell--visited {
+.cell--visited-animated {
   animation: flash 1.5s ease-out alternate forwards;
 }
 
-.cell--path {
+.cell--visited {
+  background-color: rgba(0, 190, 218, 0.75);
+}
+
+.cell--path-animated {
   animation: glow 1.5s linear alternate forwards;
 }
 
-.cell--wall {
+.cell--path {
+  background-color: rgb(255, 254, 106);
+}
+
+.cell--wall-animated {
   animation: blackhole 0.3s ease-out alternate forwards;
+}
+
+.cell--wall {
+  background-color: rgb(12, 53, 71);
 }
 
 @keyframes flash {

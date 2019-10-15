@@ -56,6 +56,12 @@
 (defn mark-path [board pos]
   (update board :board/path conj pos))
 
+(defn set-visited [board visited]
+  (assoc board :board/visited (set visited)))
+
+(defn set-path [board path]
+  (assoc board :board/path (set path)))
+
 (defn make-wall [board pos]
   (let [neighbors (neighbor-coords board pos)]
     (reduce
