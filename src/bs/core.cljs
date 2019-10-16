@@ -16,7 +16,7 @@
 ;; DB
 
 (defn- new-db []
-  (let [[src target] [[10 10] [14 10]]]
+  (let [[src target] [[10 10] [30 15]]]
     {:db/board (-> (board/make 56 20)
                    (board/set-source src)
                    (board/set-target target))
