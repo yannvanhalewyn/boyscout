@@ -1,7 +1,8 @@
 (ns bs.core
   (:require [bs.board :as board]
             [bs.algorithm :as alg]
-            [reagent.core :as r]))
+            [reagent.core :as r]
+            [clojure.core.async :as a :refer [go go-loop <!]]))
 
 ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
 ;; Helpers
@@ -52,18 +53,26 @@
 
 (defn- animate!* [state {::alg/keys [shortest-path visitation-order] :as alg-result}]
   (swap! state dissoc :db/alg-result)
-  (doseq [[i pos] (map-indexed vector visitation-order)]
-    (js/setTimeout
-     #(add-class! (cell-id pos) "cell--visited-animated")
-     (* i SPEED)))
-  (doseq [[i pos] (map-indexed vector shortest-path)]
-    (js/setTimeout
-     #(add-class! (cell-id pos) "cell--path-animated")
-     (+ (* (count visitation-order) SPEED) (* i SPEED 4))))
-  (js/setTimeout
-   #(swap! state assoc :db/alg-result alg-result)
-   (+ (* (count visitation-order) SPEED)
-      (* (count shortest-path) SPEED 4))))
+
+  (let [c (a/chan)]
+    (go-loop [{:animate/keys [id class timeout]} (<! c)]
+      (add-class! id class)
+      (<! (a/timeout timeout))
+      (if-let [next (<! c)]
+        (recur next)
+        (swap! state assoc :db/alg-result alg-result)))
+
+    (doseq [pos visitation-order]
+      (a/put! c {:animate/id (cell-id pos)
+                 :animate/class "cell--visited-animated"
+                 :animate/timeout SPEED}))
+
+    (doseq [pos shortest-path]
+      (a/put! c {:animate/id (cell-id pos)
+                 :animate/class "cell--path-animated"
+                 :animate/timeout (* SPEED 4)}))
+
+    (a/close! c)))
 
 (defn- animate! [state]
   (let [{::alg/keys [shortest-path] :as result} (process-alg @state)]
