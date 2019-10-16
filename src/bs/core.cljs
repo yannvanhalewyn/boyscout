@@ -80,8 +80,31 @@
         ;; For react performance, don't swap in every wall while
         ;; dragging, but rather natively animate them, store them in a
         ;; cache and flush them to the app db on mouse up.
-        new-walls-cache (transient [])]
-    [:table
+        new-walls-cache (transient [])
+
+        start-drag! (fn [pos]
+                      (let [type (cond (board/source? board pos) :drag/source
+                                       (board/target? board pos) :drag/target
+                                       :else :drag/wall)]
+                        (update! state assoc :db/dragging type)
+                        (when (= :drag/wall type)
+                          (update! state update :db/board board/make-wall pos))))
+        drag-to!     (fn [pos]
+                       (when-let [f (case (:db/dragging st)
+                                      :drag/source board/set-source
+                                      :drag/target board/set-target
+                                      nil)]
+                         (update! state update :db/board f pos))
+                       (when (= :drag/wall (:db/dragging st))
+                         (add-class! (cell-id pos) "cell--wall-animated")
+                         (conj! new-walls-cache pos)))
+        end-drag!     (fn []
+                        (when (contains? st :db/dragging)
+                          (update! state dissoc :db/dragging)
+                          (when-let [new-walls (seq (persistent! new-walls-cache))]
+                            (update! state assoc :db/board
+                                     (reduce board/make-wall board new-walls)))))]
+    [:table {:on-mouse-leave end-drag!}
      [:tbody
       (for [y (range height)]
         ^{:key y}
@@ -96,28 +119,10 @@
                                  board/wall? "cell--wall"
                                  path? "cell--path"
                                  visited? "cell--visited"}
-                          :when (f board [x y])]
-                      v)
-             :on-mouse-down #(let [type (cond (board/source? board pos) :drag/source
-                                              (board/target? board pos) :drag/target
-                                              :else :drag/wall)]
-                               (update! state assoc :db/dragging type)
-                               (when (= :drag/wall type)
-                                 (update! state update :db/board board/make-wall pos)))
-             :on-mouse-enter (fn []
-                               (when-let [f (case (:db/dragging st)
-                                              :drag/source board/set-source
-                                              :drag/target board/set-target
-                                              nil)]
-                                 (update! state update :db/board f pos))
-                               (when (= :drag/wall (:db/dragging st))
-                                 (add-class! (cell-id pos) "cell--wall-animated")
-                                 (conj! new-walls-cache pos)))
-             :on-mouse-up (fn []
-                            (update! state dissoc :db/dragging)
-                            (when-let [new-walls (seq (persistent! new-walls-cache))]
-                              (update! state assoc :db/board
-                                       (reduce board/make-wall board new-walls))))}])])]]))
+                          :when (f board [x y])] v)
+             :on-mouse-down #(start-drag! pos)
+             :on-mouse-enter #(drag-to! pos)
+             :on-mouse-up end-drag!}])])]]))
 
 (defn- algo-dropdown []
   (let [open? (r/atom false)]
