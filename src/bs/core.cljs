@@ -113,18 +113,33 @@
                               (update-board! state (reduce board/make-wall board
                                                            new-walls))))}])])]]))
 
+(defn- algo-dropdown []
+  (let [open? (r/atom false)]
+    (fn [{:keys [current on-change]}]
+      [:div
+       [:button.dropdown__select
+        {:on-click #(reset! open? true)}
+        (::alg/name current)
+        [:i.mdi.mdi-chevron-down]]
+       (when @open?
+         [:ul.dropdown__options
+          (for [{::alg/keys [key name] :as alg} alg/ALL]
+            ^{:key key}
+            [:li.dropdown__option
+             {:on-click (fn [] (reset! open? false) (on-change alg))}
+             (when (= current alg) [:i.mdi.mdi-graph-outline.mr-3])
+             [:span.leading-loose name]])])])))
 
 (defn root [state]
   [:<>
-   [:div.flex.items-center.px-16.py-4.bg-blue-600
-    [:span.logo-title.mr-1]
+   [:div.header
+    [:span.logo-title.mr-2]
     [:h1.text-3xl.inline-block.text-white.mr-8 "Boyscout"]
-    [:select {:on-change #(swap! state assoc :db/current-alg
-                                 (alg/from-name (.. % -target -value)))}
-     (for [alg alg/ALL]
-       ^{:key (::alg/key alg)} [:option (::alg/name alg)])]
-    [:button.btn.text-white.hover:bg-white.hover:text-blue-700.mx-4 {:on-click #(animate! state)} "Visualize!"]
-    [:button.text-white.underline.hover:no-underline.ml-auto {:on-click #(reset! state (new-db))} "Reset"]]
+    [algo-dropdown {:on-change #(swap! state assoc :db/current-alg %)
+                    :current (:db/current-alg @state)}]
+    [:button.btn.btn--header {:on-click #(animate! state)} "Visualize!"]
+    [:button.text-white.underline.hover:no-underline.ml-auto
+     {:on-click #(reset! state (new-db))} "Reset"]]
    (when-let [e (:db/error @state)]
      [:div.alert [:p e]])
    [:div.container.mx-auto.tracking-wide.mt-8

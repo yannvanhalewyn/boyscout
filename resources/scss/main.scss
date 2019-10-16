@@ -13,9 +13,34 @@ button:active, button:focus, select:active, select:focus {
   outline: none;
 }
 
+.header {
+  @apply flex items-center px-16 py-4 bg-blue-600
+}
+
 .logo-title {
   background-image: url(../img/boyscout.svg);
   @apply bg-no-repeat bg-contain w-6 h-6 inline-block;
+}
+
+.icon-graph {
+  background-image: url(../img/graph.svg);
+  @apply bg-no-repeat bg-contain w-5 h-5 inline-block;
+}
+
+.dropdown__select {
+  @apply w-56 text-left tracking-wide text-lg px-3 py-1 text-gray-200
+}
+
+.dropdown__options {
+  @apply rounded py-2 bg-white fixed shadow-md
+}
+
+.dropdown__option {
+  @apply block cursor-pointer px-4 py-2 text-gray-700
+}
+
+.dropdown__option:hover {
+  @apply bg-blue-600 text-white
 }
 
 .alert {
@@ -35,6 +60,15 @@ button:active, button:focus, select:active, select:focus {
 .btn {
   @apply border text-sm font-semibold rounded px-4 py-2 leading-normal shadow-md;
 }
+
+.btn--header {
+  @apply text-white mx-4
+}
+
+.btn--header:hover {
+  @apply bg-white text-blue-700
+}
+
 
 @keyframes appear {
   0% {
