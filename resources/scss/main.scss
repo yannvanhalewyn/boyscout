@@ -69,6 +69,17 @@ button:active, button:focus, select:active, select:focus {
   @apply bg-white text-blue-700
 }
 
+.btn--red {
+  @apply bg-red-500 text-white border-none
+}
+
+.btn--red:hover {
+  @apply bg-red-600
+}
+
+.animate-pulsing:before {
+  animation: pulsing 0.8s linear alternate infinite;
+}
 
 @keyframes appear {
   0% {
@@ -90,6 +101,16 @@ button:active, button:focus, select:active, select:focus {
 
   100% {
     transform: scale(1.0);
+  }
+}
+
+@keyframes pulsing {
+  0% {
+    transform: scale(1.6);
+  }
+
+  100% {
+    transform: scale(1.9);
   }
 }
 

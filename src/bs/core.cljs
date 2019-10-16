@@ -1,14 +1,12 @@
 (ns bs.core
   (:require [bs.board :as board]
             [bs.algorithm :as alg]
-            [reagent.core :as r]
-            [clojure.core.async :as a :refer [go go-loop <!]]))
+            [bs.animation :as animation]
+            [bs.utils :as u]
+            [reagent.core :as r]))
 
 ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
 ;; Helpers
-
-(defn- add-class! [id class]
-  (.add (.-classList (.getElementById js/document id)) class))
 
 (defn- cell-id [[x y]]
   (str "cell-" x "-" y))
@@ -54,25 +52,15 @@
 (defn- animate!* [state {::alg/keys [shortest-path visitation-order] :as alg-result}]
   (swap! state dissoc :db/alg-result)
 
-  (let [c (a/chan)]
-    (go-loop [{:animate/keys [id class timeout]} (<! c)]
-      (add-class! id class)
-      (<! (a/timeout timeout))
-      (if-let [next (<! c)]
-        (recur next)
-        (swap! state assoc :db/alg-result alg-result)))
-
-    (doseq [pos visitation-order]
-      (a/put! c {:animate/id (cell-id pos)
-                 :animate/class "cell--visited-animated"
-                 :animate/timeout SPEED}))
-
-    (doseq [pos shortest-path]
-      (a/put! c {:animate/id (cell-id pos)
-                 :animate/class "cell--path-animated"
-                 :animate/timeout (* SPEED 4)}))
-
-    (a/close! c)))
+  (let [steps (concat
+               (map #(animation/make-step (cell-id %) "cell--visited-animated" SPEED)
+                    visitation-order)
+               (map #(animation/make-step (cell-id %) "cell--path-animated" (* SPEED 4))
+                    shortest-path))
+        animation (animation/start! steps #(swap! state assoc
+                                                  :db/animation %
+                                                  :db/alg-result alg-result))]
+    (swap! state assoc :db/animation animation)))
 
 (defn- animate! [state]
   (let [{::alg/keys [shortest-path] :as result} (process-alg @state)]
@@ -105,7 +93,7 @@
                                       nil)]
                          (update! state update :db/board f pos))
                        (when (= :drag/wall (:db/dragging st))
-                         (add-class! (cell-id pos) "cell--wall-animated")
+                         (u/add-class! (cell-id pos) "cell--wall-animated")
                          (conj! new-walls-cache pos)))
         end-drag!     (fn []
                         (when (contains? st :db/dragging)
@@ -113,6 +101,7 @@
                           (when-let [new-walls (seq (persistent! new-walls-cache))]
                             (update! state assoc :db/board
                                      (reduce board/make-wall board new-walls)))))]
+    (.log js/console (:db/animation st))
     [:table {:on-mouse-leave end-drag!}
      [:tbody
       (for [y (range height)]
@@ -159,7 +148,12 @@
     [:h1.text-3xl.inline-block.text-white.mr-8 "Boyscout"]
     [algo-dropdown {:on-change #(update! state assoc :db/current-alg %)
                     :current (:db/current-alg @state)}]
-    [:button.btn.btn--header {:on-click #(animate! state)} "Visualize!"]
+    (if (animation/running? (:db/animation @state))
+      [:button.btn.btn--red
+       {:on-click #(swap! state update :db/animation animation/cancel!)}
+       [:i.mdi.mdi-stop-circle-outline.animate-pulsing]
+       [:span.pl-3.font-bold.text-base "Stop"]]
+      [:button.btn.btn--header {:on-click #(animate! state)} "Visualize!"])
     [:button.text-white.underline.hover:no-underline.ml-auto
      {:on-click #(reset! state (new-db))} "Reset"]]
    (when-let [e (:db/error @state)]
