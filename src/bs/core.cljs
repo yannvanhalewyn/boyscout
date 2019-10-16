@@ -50,8 +50,6 @@
 (def SPEED 8)
 
 (defn- animate!* [state {::alg/keys [shortest-path visitation-order] :as alg-result}]
-  (swap! state dissoc :db/alg-result)
-
   (let [steps (concat
                (map #(animation/make-step (cell-id %) "cell--visited-animated" SPEED)
                     visitation-order)
@@ -69,9 +67,10 @@
       (animate!* state result))))
 
 (defn board-table [state]
-  (let [{:db/keys [board alg-result] :as st} @state
+  (let [{:db/keys [board alg-result animation] :as st} @state
         {:board/keys [width height] :as board} board
-        {::alg/keys [shortest-path visitation-order]} alg-result
+        animating? (animation/running? animation)
+        {::alg/keys [shortest-path visitation-order]} (when-not animating? alg-result)
         path? (let [s (set shortest-path)] #(contains? s %2))
         visited? (let [s (set visitation-order)] #(contains? s %2))
         ;; For react performance, don't swap in every wall while
@@ -102,7 +101,7 @@
                             (update! state assoc :db/board
                                      (reduce board/make-wall board new-walls)))))]
     [:table {:on-mouse-leave end-drag!}
-     [:tbody
+     [:tbody {:class (when animating? "cursor-not-allowed")}
       (for [y (range height)]
         ^{:key y}
         [:tr
@@ -117,7 +116,7 @@
                                  path? "cell--path"
                                  visited? "cell--visited"}
                           :when (f board [x y])] v)
-             :on-mouse-down #(start-drag! pos)
+             :on-mouse-down (when-not animating? #(start-drag! pos))
              :on-mouse-enter #(drag-to! pos)
              :on-mouse-up end-drag!}])])]]))
 
