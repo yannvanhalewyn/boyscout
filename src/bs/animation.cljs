@@ -2,12 +2,7 @@
   (:require [bs.utils :as u]
             [clojure.core.async :as a :refer [go-loop]]))
 
-(defn- rewind!
-  "If the animation is cancelled, go ahead and remove all those
-  classes we added."
-  [steps]
-  (doseq [{::keys [id class]} steps]
-    (u/remove-class! id class)))
+(def REWIND_SPEED 2)
 
 (defn make-step
   "Makes a step that can be used for an animation"
@@ -23,7 +18,10 @@
       (if (seq others)
         (let [[v _] (a/alts! [(a/timeout timeout) close-ch])]
           (if (= v :animation/stop!)
-            (rewind! (take (- (count steps) (count others)) steps))
+            (doseq [{::keys [id class]}
+                    (reverse (take (- (count steps) (count others)) steps))]
+              (a/<! (a/timeout REWIND_SPEED))
+              (u/remove-class! id class))
             (recur others)))
         (done-fn {::status ::done})))
     {::close-ch close-ch

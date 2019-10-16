@@ -101,7 +101,6 @@
                           (when-let [new-walls (seq (persistent! new-walls-cache))]
                             (update! state assoc :db/board
                                      (reduce board/make-wall board new-walls)))))]
-    (.log js/console (:db/animation st))
     [:table {:on-mouse-leave end-drag!}
      [:tbody
       (for [y (range height)]
