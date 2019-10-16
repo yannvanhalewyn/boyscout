@@ -3,11 +3,9 @@
             [bs.algorithms.dijkstra :as dijkstra]
             [bs.algorithms.depth-first :as depth-first]))
 
-(def ALL [{::key ::dijkstra    ::name "Dijkstra"}
-          {::key ::depth-first ::name "Depth First Search"}])
-
-(defn from-name [s]
-  (first (filter #(= s (::name %)) ALL)))
+(def ALL [{::key ::dijkstra      ::name "Dijkstra"}
+          {::key ::depth-first   ::name "Depth First Search"}
+          {::key ::breadth-first ::name "Breadth First Search"}])
 
 (defmulti process
   "Traverses the board graph using a specified algorithm. Will return
@@ -16,6 +14,15 @@
   the fastest path, effectively being the found solution
   `:bs.algorithms/shortest-path`"
   (fn [alg & _] alg))
+
+(defn- process* [f board source target]
+  (let [visitation-order (transient [])
+        result (f source target (fn [pos]
+                                  (conj! visitation-order pos)
+                                  (board/neighbor-coords board pos)))]
+    (when (and (= source (first result)) (= target (last result)))
+      {::shortest-path result
+       ::visitation-order (persistent! visitation-order)})))
 
 (defmethod process ::dijkstra [_ board source target]
   (let [visitation-order (transient [])
@@ -31,9 +38,7 @@
        ::visitation-order (persistent! visitation-order)})))
 
 (defmethod process ::depth-first [_ board source target]
-  (let [result (depth-first/depth-first source #(if (= % target)
-                                                  :depth-first/done
-                                                  (board/neighbor-coords board %)))]
-    (when (= target (last result))
-      {::shortest-path result
-       ::visitation-order result})))
+  (process* depth-first/depth-first board source target))
+
+(defmethod process ::breadth-first [_ board source target]
+  (process* depth-first/breadth-first board source target))
