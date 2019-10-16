@@ -15,27 +15,19 @@
   `:bs.algorithms/shortest-path`"
   (fn [alg & _] alg))
 
-(defn- process* [f board source target]
+(defn- process* [f board source target & [neighbor-fn]]
   (let [visitation-order (transient [])
         result (f source target (fn [pos]
                                   (conj! visitation-order pos)
-                                  (board/neighbor-coords board pos)))]
+                                  ((or neighbor-fn board/neighbor-coords)
+                                   board pos)))]
     (when (and (= source (first result)) (= target (last result)))
       {::shortest-path result
        ::visitation-order (persistent! visitation-order)})))
 
 (defmethod process ::dijkstra [_ board source target]
-  (let [visitation-order (transient [])
-        neighbor-cost-fn (fn [pos]
-                           (conj! visitation-order pos)
-                           (if (= pos target)
-                             :dijkstra/done
-                             (zipmap (board/neighbor-coords board pos) (repeat 1))))
-        costs (dijkstra/dijkstra source neighbor-cost-fn)
-        path (dijkstra/shortest-path costs target)]
-    (when (and (= source (first path)) (= target (last path)))
-      {::shortest-path path
-       ::visitation-order (persistent! visitation-order)})))
+  (process* dijkstra/dijkstra board source target
+            #(zipmap (board/neighbor-coords board %2) (repeat 1))))
 
 (defmethod process ::depth-first [_ board source target]
   (process* depth-first/depth-first board source target))

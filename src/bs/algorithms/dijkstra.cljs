@@ -2,7 +2,7 @@
   (:require [bs.utils :as u]
             [tailrecursion.priority-map :refer [priority-map-keyfn]]))
 
-(defn shortest-path
+(defn- shortest-path
   "Walks back from the target node to the source node via the fastest
   parents in the costs map. To be used at the end of the dijkstra
   algorithm."
@@ -25,16 +25,16 @@
   with `:cost` and `:parent` as keys. The `:parent` can be used to
   walk back from any target node to the source node, as is necessary
   when using Dijkstra to compute the shortest path."
-  [start neighbor-costs-fn]
-  (loop [distances (priority-map-keyfn :cost start {:cost 0})
+  [source target neighbor-costs-fn]
+  (loop [distances (priority-map-keyfn :cost source {:cost 0})
          result {}]
     ;; Start on the nearest unvisited node (priority-map)
     (if-let [[cur current-distance] (peek distances)]
       (let [neighbor-costs (neighbor-costs-fn cur)
             ;; Add the current-node to the result set
             result (assoc result cur current-distance)]
-        (if (= :dijkstra/done neighbor-costs)
-          result
+        (if (= target cur)
+          (shortest-path result target)
           ;; Recalculate cost of all unvisited (!) neighbors
           (let [neighbor-costs (-> neighbor-costs
                                    (u/remove-keys result)

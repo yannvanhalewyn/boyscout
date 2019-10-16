@@ -58,7 +58,6 @@
 
   (testing "Example between two other points"
     (let [result (sut/process ::sut/breadth-first (board/make 4 4) [1 0] [2 3])]
-      (.log js/console result)
       (is (= [[1 0] [2 0] [2 1] [2 2] [2 3]]
              (::sut/shortest-path result)))
       (is (= [[1 0] [0 0] [1 1] [2 0] [0 1] [1 2] [2 1]
