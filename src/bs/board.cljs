@@ -62,6 +62,9 @@
 (defn set-path [board path]
   (assoc board :board/path (set path)))
 
+(defn set-path-and-visited [board path visited]
+  (-> board (set-visited visited) (set-path path)))
+
 (defn make-wall [board pos]
   (let [neighbors (neighbor-coords board pos)]
     (reduce

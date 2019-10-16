@@ -30,17 +30,15 @@
   (alg/process (::alg/key current-alg) board
                (:board/source board) (:board/target board)))
 
-(defn- update-board-from-algorithm [board result]
-  (-> board
-      (board/set-visited (::alg/visitation-order result))
-      (board/set-path (::alg/shortest-path result))))
+(defn- update-board-from-algorithm [board {::alg/keys [shortest-path visitation-order]}]
+  (board/set-path-and-visited board shortest-path visitation-order))
 
 (defn- update-board!
   "Swaps the state with a new board. When it already has been
   animated, will recalculate the algorithm result."
   [state new-board]
   (if (seq (:board/path new-board))
-    (let [result (current-algorithm-results @state)]
+    (let [result (current-algorithm-results (assoc @state :db/board new-board))]
       (swap! state assoc :db/board (update-board-from-algorithm new-board result)))
     (swap! state assoc :db/board new-board)))
 
@@ -50,6 +48,7 @@
 (def SPEED 8)
 
 (defn- animate!* [state {::alg/keys [shortest-path visitation-order] :as alg-result}]
+  (swap! state update :db/board board/set-path-and-visited nil nil)
   (doseq [[i pos] (map-indexed vector visitation-order)]
     (js/setTimeout
      #(add-class! (cell-id pos) "cell--visited-animated")
@@ -72,7 +71,10 @@
 (defn board-table [state]
   (let [st @state
         {:board/keys [width height] :as board} (:db/board st)
-        added-walls (transient [])]
+        ;; For react performance, don't swap in every wall while
+        ;; dragging, but rather natively animate them, store them in a
+        ;; cache and flush them to the app db on mouse up.
+        new-walls-cache (transient [])]
     [:table
      [:tbody
       (for [y (range height)]
@@ -95,23 +97,21 @@
                                               :else :drag/wall)]
                                (swap! state assoc :db/dragging type)
                                (when (= :drag/wall type)
-                                 (swap! state update :db/board board/make-wall pos)))
+                                 (update-board! state (board/make-wall board pos))))
              :on-mouse-enter (fn []
                                (when-let [f (case (:db/dragging st)
                                               :drag/source board/set-source
                                               :drag/target board/set-target
                                               nil)]
                                  (update-board! state (f (:db/board st) pos)))
-                               ;; For react performance, don't swap in
-                               ;; every wall while dragging
                                (when (= :drag/wall (:db/dragging st))
                                  (add-class! (cell-id pos) "cell--wall-animated")
-                                 (conj! added-walls pos)))
+                                 (conj! new-walls-cache pos)))
              :on-mouse-up (fn []
                             (swap! state dissoc :db/dragging)
-                            (when (= :drag/wall (:db/dragging st))
+                            (when-let [new-walls (seq (persistent! new-walls-cache))]
                               (update-board! state (reduce board/make-wall board
-                                                           (persistent! added-walls)))))}])])]]))
+                                                           new-walls))))}])])]]))
 
 
 (defn root [state]
