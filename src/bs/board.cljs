@@ -23,8 +23,6 @@
   (let [coords (set (mapcat #(map vector (repeat %) (range height)) (range width)))]
     {:board/width width
      :board/height height
-     :board/visited #{}
-     :board/path #{}
      :board/edges
      (reduce
       (fn [out [x y :as pos]]
@@ -50,21 +48,6 @@
 (defn set-target [board pos]
   (assoc board :board/target pos))
 
-(defn mark-visited [board pos]
-  (update board :board/visited conj pos))
-
-(defn mark-path [board pos]
-  (update board :board/path conj pos))
-
-(defn set-visited [board visited]
-  (assoc board :board/visited (set visited)))
-
-(defn set-path [board path]
-  (assoc board :board/path (set path)))
-
-(defn set-path-and-visited [board path visited]
-  (-> board (set-visited visited) (set-path path)))
-
 (defn make-wall [board pos]
   (let [neighbors (neighbor-coords board pos)]
     (reduce
@@ -79,12 +62,6 @@
 
 (defn target? [board pos]
   (= pos (:board/target board)))
-
-(defn visited? [board pos]
-  (contains? (:board/visited board) pos))
-
-(defn path? [board pos]
-  (contains? (:board/path board) pos))
 
 (defn wall? [board pos]
   (empty? (get-in board [:board/edges pos])))

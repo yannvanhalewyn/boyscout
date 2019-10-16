@@ -26,20 +26,18 @@
   (swap! state assoc :db/error err)
   (js/setTimeout #(swap! state dissoc :db/error) 5000))
 
-(defn- current-algorithm-results [{:db/keys [board current-alg]}]
+(defn- process-alg [{:db/keys [current-alg]} board]
   (alg/process (::alg/key current-alg) board
                (:board/source board) (:board/target board)))
-
-(defn- update-board-from-algorithm [board {::alg/keys [shortest-path visitation-order]}]
-  (board/set-path-and-visited board shortest-path visitation-order))
 
 (defn- update-board!
   "Swaps the state with a new board. When it already has been
   animated, will recalculate the algorithm result."
   [state new-board]
-  (if (seq (:board/path new-board))
-    (let [result (current-algorithm-results (assoc @state :db/board new-board))]
-      (swap! state assoc :db/board (update-board-from-algorithm new-board result)))
+  (if (contains? @state :db/alg-result)
+    (swap! state assoc
+           :db/board new-board
+           :db/alg-result (process-alg @state new-board) )
     (swap! state assoc :db/board new-board)))
 
 ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
@@ -48,7 +46,7 @@
 (def SPEED 8)
 
 (defn- animate!* [state {::alg/keys [shortest-path visitation-order] :as alg-result}]
-  (swap! state update :db/board board/set-path-and-visited nil nil)
+  (swap! state dissoc :db/alg-result)
   (doseq [[i pos] (map-indexed vector visitation-order)]
     (js/setTimeout
      #(add-class! (cell-id pos) "cell--visited-animated")
@@ -58,19 +56,22 @@
      #(add-class! (cell-id pos) "cell--path-animated")
      (+ (* (count visitation-order) SPEED) (* i SPEED 4))))
   (js/setTimeout
-   #(swap! state update :db/board update-board-from-algorithm alg-result)
+   #(swap! state assoc :db/alg-result alg-result)
    (+ (* (count visitation-order) SPEED)
       (* (count shortest-path) SPEED 4))))
 
 (defn- animate! [state]
-  (let [{::alg/keys [shortest-path] :as result} (current-algorithm-results @state)]
+  (let [{::alg/keys [shortest-path] :as result} (process-alg @state (:db/board @state))]
     (if (empty? shortest-path)
       (show-error! state "Target is unreachable")
       (animate!* state result))))
 
 (defn board-table [state]
-  (let [st @state
-        {:board/keys [width height] :as board} (:db/board st)
+  (let [{:db/keys [board alg-result] :as st} @state
+        {:board/keys [width height] :as board} board
+        {::alg/keys [shortest-path visitation-order]} alg-result
+        path? (let [s (set shortest-path)] #(contains? s %2))
+        visited? (let [s (set visitation-order)] #(contains? s %2))
         ;; For react performance, don't swap in every wall while
         ;; dragging, but rather natively animate them, store them in a
         ;; cache and flush them to the app db on mouse up.
@@ -85,11 +86,11 @@
            ^{:key x}
            [:td.cell
             {:id (cell-id pos)
-             :class (for [[f v] {board/source? "cell--source"
-                                 board/target? "cell--target"
-                                 board/path? "cell--path"
-                                 board/visited? "cell--visited"
-                                 board/wall? "cell--wall"}
+             :class (for [[f v] {board/source? "cell--source-animated"
+                                 board/target? "cell--target-animated"
+                                 board/wall? "cell--wall"
+                                 path? "cell--path"
+                                 visited? "cell--visited"}
                           :when (f board [x y])]
                       v)
              :on-mouse-down #(let [type (cond (board/source? board pos) :drag/source
@@ -135,7 +136,11 @@
    [:div.header
     [:span.logo-title.mr-2]
     [:h1.text-3xl.inline-block.text-white.mr-8 "Boyscout"]
-    [algo-dropdown {:on-change #(swap! state assoc :db/current-alg %)
+    [algo-dropdown {:on-change #(if (contains? @state :db/alg-result)
+                                  (swap! state assoc
+                                         :db/current-alg %
+                                         :db/alg-result (process-alg {:db/current-alg %} (:db/board @state)))
+                                  (swap! state assoc :db/current-alg %))
                     :current (:db/current-alg @state)}]
     [:button.btn.btn--header {:on-click #(animate! state)} "Visualize!"]
     [:button.text-white.underline.hover:no-underline.ml-auto
