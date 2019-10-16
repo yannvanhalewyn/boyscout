@@ -32,7 +32,7 @@ button:active, button:focus, select:active, select:focus {
 }
 
 .dropdown__options {
-  @apply rounded py-2 bg-white fixed shadow-md
+  @apply rounded py-2 bg-white fixed z-10 shadow-md
 }
 
 .dropdown__option {

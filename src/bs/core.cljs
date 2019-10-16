@@ -123,13 +123,15 @@
         (::alg/name current)
         [:i.mdi.mdi-chevron-down]]
        (when @open?
-         [:ul.dropdown__options
-          (for [{::alg/keys [key name] :as alg} alg/ALL]
-            ^{:key key}
-            [:li.dropdown__option
-             {:on-click (fn [] (reset! open? false) (on-change alg))}
-             (when (= current alg) [:i.mdi.mdi-graph-outline.mr-3])
-             [:span.leading-loose name]])])])))
+         [:<>
+          [:div.fixed.cursor-default.inset-0 {:on-click #(reset! open? false)}]
+          [:ul.dropdown__options
+           (for [{::alg/keys [key name] :as alg} alg/ALL]
+             ^{:key key}
+             [:li.dropdown__option
+              {:on-click (fn [] (reset! open? false) (on-change alg))}
+              (when (= current alg) [:i.mdi.mdi-graph-outline.mr-3])
+              [:span.leading-loose name]])]])])))
 
 (defn root [state]
   [:<>
