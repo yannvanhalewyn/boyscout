@@ -16,15 +16,15 @@
 ;; DB
 
 (defn- new-db []
-  (let [[src target] [[10 10] [30 15]]]
-    {:db/board (-> (board/make 66 20)
+  (let [[src target] [[10 10] [14 10]]]
+    {:db/board (-> (board/make 56 20)
                    (board/set-source src)
                    (board/set-target target))
      :db/current-alg (first alg/ALL)}))
 
 (defn- show-error! [state err]
   (swap! state assoc :db/error err)
-  (js/setTimeout #(swap! state dissoc :db/error) 2000))
+  (js/setTimeout #(swap! state dissoc :db/error) 5000))
 
 (defn- current-algorithm-results [{:db/keys [board current-alg]}]
   (alg/process (::alg/key current-alg) board
@@ -115,16 +115,18 @@
 
 
 (defn root [state]
-  [:<>
-   [:h1 "Pathfinder visualizer"]
-   [:select {:on-change #(swap! state assoc :db/current-alg
-                                (alg/from-name (.. % -target -value)))}
-    (for [alg alg/ALL]
-      ^{:key (::alg/key alg)} [:option (::alg/name alg)])]
-   [:button {:on-click #(animate! state)} "Visualize!"]
-   [:button {:on-click #(reset! state (new-db))} "Reset"]
+  [:div.container.mx-auto.tracking-wide
+   [:div.flex.items-center.py-4
+    [:span.logo-title.mr-1]
+    [:h1.text-3xl.inline-block.mr-8 "Boyscout"]
+    [:select {:on-change #(swap! state assoc :db/current-alg
+                                 (alg/from-name (.. % -target -value)))}
+     (for [alg alg/ALL]
+       ^{:key (::alg/key alg)} [:option (::alg/name alg)])]
+    [:button.btn.btn--green.mx-4 {:on-click #(animate! state)} "Visualize!"]
+    [:button.u-link {:on-click #(reset! state (new-db))} "Reset"]]
    (when-let [e (:db/error @state)]
-     [:p.u-error e])
+     [:div.alert [:p e]])
    [board-table state]])
 
 (defn ^:dev/after-load render! []

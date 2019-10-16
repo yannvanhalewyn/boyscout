@@ -1,14 +1,95 @@
-*, *:before, *:after {
-  box-sizing: border-box;
-}
+@tailwind base;
+@tailwind components;
+@tailwind utilities;
+
+/* ============================================================================
+   UI */
 
 body {
-  font-family: 'Roboto', sans-serif;
+  font-family: Roboto, -apple-system, BlinkMacSystemFont, "Segoe UI", sans-serif;
 }
 
-.u-error {
-  color: #e3224f;
+button:active, button:focus, select:active, select:focus {
+  outline: none;
 }
+
+.logo-title {
+  background-image: url(/img/boyscout.svg);
+  @apply bg-no-repeat bg-contain w-6 h-6 inline-block;
+}
+
+.alert {
+  animation: appear 0.5s;
+  @apply bg-red-100 border-l-4 border-orange-500 text-red-700 p-4 fixed;
+}
+
+.u-link {
+  @apply text-blue-700 underline;
+}
+
+.u-link:hover {
+  @apply text-blue-500;
+  text-decoration: none;
+}
+
+.btn {
+  @apply border text-sm font-semibold rounded px-4 py-2 leading-normal shadow-md;
+}
+
+.btn:hover {
+  @apply text-white
+}
+
+.btn--green {
+  @apply text-green-500 border-green-500;
+}
+
+.btn--green:hover {
+  @apply bg-green-500
+}
+
+.btn--blue {
+  @apply text-blue-500 border-blue-500;
+}
+
+.btn--red:hover {
+  @apply bg-red-500
+}
+
+.btn--red {
+  @apply text-red-500 border-red-500;
+}
+
+.btn--blue:hover {
+  @apply bg-blue-500
+}
+
+@keyframes appear {
+  0% {
+    opacity: 0;
+  }
+  100% {
+    opacity: 1;
+  }
+}
+
+@keyframes grow {
+  0% {
+    transform: scale(.3);
+  }
+
+  50% {
+    transform: scale(1.2);
+  }
+
+  100% {
+    transform: scale(1.0);
+  }
+}
+
+
+/* ============================================================================
+   Board cells and animation */
 
 table {
   border-collapse:collapse;
