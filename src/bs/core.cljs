@@ -115,19 +115,20 @@
 
 
 (defn root [state]
-  [:div.container.mx-auto.tracking-wide
-   [:div.flex.items-center.py-4
+  [:<>
+   [:div.flex.items-center.px-16.py-4.bg-blue-600
     [:span.logo-title.mr-1]
-    [:h1.text-3xl.inline-block.mr-8 "Boyscout"]
+    [:h1.text-3xl.inline-block.text-white.mr-8 "Boyscout"]
     [:select {:on-change #(swap! state assoc :db/current-alg
                                  (alg/from-name (.. % -target -value)))}
      (for [alg alg/ALL]
        ^{:key (::alg/key alg)} [:option (::alg/name alg)])]
-    [:button.btn.btn--green.mx-4 {:on-click #(animate! state)} "Visualize!"]
-    [:button.u-link {:on-click #(reset! state (new-db))} "Reset"]]
+    [:button.btn.text-white.hover:bg-white.hover:text-blue-700.mx-4 {:on-click #(animate! state)} "Visualize!"]
+    [:button.text-white.underline.hover:no-underline.ml-auto {:on-click #(reset! state (new-db))} "Reset"]]
    (when-let [e (:db/error @state)]
      [:div.alert [:p e]])
-   [board-table state]])
+   [:div.container.mx-auto.tracking-wide.mt-8
+    [board-table state]]])
 
 (defn ^:dev/after-load render! []
   (r/render [root (r/atom (new-db))] (.getElementById js/document "app")))
