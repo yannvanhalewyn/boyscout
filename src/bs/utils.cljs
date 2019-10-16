@@ -3,6 +3,9 @@
 (defn add-class! [id class]
   (.. js/document (getElementById id) -classList (add class)))
 
+(defn remove-class! [id class]
+  (.. js/document (getElementById id) -classList (remove class)))
+
 (defn split-by
   "Returns a vector with two elements: the first is the collection of
   elements for which the predicate returned a truthy value, the second
