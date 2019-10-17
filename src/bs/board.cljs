@@ -54,6 +54,9 @@
      #(update-in %1 [:board/edges %2] disj pos)
      (assoc-in board [:board/edges pos] #{}) neighbors)))
 
+(defn make-walls [board positions]
+  (reduce make-wall board positions))
+
 ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
 ;; Queries
 
