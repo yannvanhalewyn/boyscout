@@ -65,7 +65,7 @@
           description]
 
          ;; Checkmarks and select(ed) button
-         [:div.absolute.w-full.bottom-0
+         [:div.absolute.w-full.bottom-0.left-0
           [:div.relative.bottom-0.left-0.flex.items-center.justify-between.mx-8.border-t-4.border-gray-200
            (if selected?
              [:<>
