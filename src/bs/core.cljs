@@ -59,32 +59,11 @@
              :on-mouse-enter #(drag-to! pos)
              :on-mouse-up end-drag!}])])]]))
 
-(defn- algo-dropdown []
-  (let [open? (r/atom false)]
-    (fn [{:keys [current on-change]}]
-      [:div
-       [:button.dropdown__select
-        {:on-click #(reset! open? true)}
-        (::alg/name current)
-        [:i.mdi.mdi-chevron-down]]
-       (when @open?
-         [:<>
-          [:div.fixed.cursor-default.inset-0 {:on-click #(reset! open? false)}]
-          [:ul.dropdown__options
-           (for [{::alg/keys [key name] :as alg} alg/ALL]
-             ^{:key key}
-             [:li.dropdown__option
-              {:on-click (fn [] (reset! open? false) (on-change alg))}
-              (when (= current alg) [:i.mdi.mdi-graph-outline.mr-3])
-              [:span.leading-loose name]])]])])))
-
 (defn root [state]
   [:<>
    [:div.header
     [:span.logo-title.mr-2]
     [:h1.text-3xl.inline-block.text-white.mr-8 "Boyscout"]
-    [algo-dropdown {:on-change #(db/update! state assoc :db/current-alg %)
-                    :current (:db/current-alg @state)}]
     (if (db/animating? @state)
       [:button.btn.btn--red
        {:on-click #(db/cancel-animation! state)}

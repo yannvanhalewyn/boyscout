@@ -1,5 +1,6 @@
 (ns bs.views
   (:require [bs.algorithm :as alg]
+            [bs.db :as db]
             [reagent.core :as r]))
 
 (defn- checkmarks [{::alg/keys [weighted? shortest-path?]}]
@@ -51,14 +52,18 @@
              [:h1.text-3xl.py-4.px-10.text-blue-800.shadow-inner.shadow-2xl.bg-gray-200 "Pick algorithm"]
              [:div.py-4.text-left.px-6
               [:div.flex
-               (for [{::alg/keys [key name description img-url]} alg/ALL]
+               (for [{::alg/keys [key name description img-url] :as alg} alg/ALL]
                  ^{:key key}
-                 [:div.p-4.relative
+                 [:a.p-4.relative.cursor-default
+                  {:on-click #(db/update! state assoc :db/current-alg alg)}
                   [:img.float-right.pl-4.w-32.h-32 {:src img-url}]
                   [:h1.text-xl.text-bold.text-gray-800 name]
                   [:p.font-serif.text-gray-700.mb-12.mt-2.leading-relaxed.tracking-wide description]
                   [:div.absolute.w-full.bottom-0.text-center
-                   [:button.px-4.bg-transparent.py-3.rounded-lg.text-indigo-500.hover:bg-gray-100.hover:text-indigo-400
+                   [:button.px-4.bg-transparent.py-3.rounded-lg
+                    {:class (if (= key (::alg/key current-alg))
+                              "text-gray-400 cursor-default"
+                              "text-indigo-500 hover:text-indigo-400 hover:bg-gray-100")}
                     "Select"]]])]
               [:button.float-right.px-4.bg-indigo-500.p-3.rounded-lg.text-white.hover:bg-indigo-400
                {:on-click #(reset! modal? false)}
