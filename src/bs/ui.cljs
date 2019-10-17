@@ -9,8 +9,8 @@
   [(if weighted?
      {:check/checked? true
       :check/title "Weighted"
-      :check/body (str "A weighted algorithm means that edges in the graph be "
-                       "more costly to traverse than others.")}
+      :check/body (str "A weighted algorithm means that edges in the graph can "
+                       "be more costly to traverse than others.")}
      {:check/checked? false
       :check/title "Not weighted"
       :check/body "All edges have the same cost of traversal"})

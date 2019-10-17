@@ -46,11 +46,11 @@
   `:bs.algorithms/path`"
   (fn [alg & _] alg))
 
-(defn- process* [f {:board/keys [source target] :as board} & [neighbor-fn]]
+(defn- process* [f {:board/keys [source target] :as board} & [visit-fn]]
   (let [visitation-order (transient [])
         result (f source target (fn [pos]
                                   (conj! visitation-order pos)
-                                  ((or neighbor-fn board/neighbor-coords)
+                                  ((or visit-fn board/neighbor-coords)
                                    board pos)))]
     (when (and (= source (first result)) (= target (last result)))
       {::path result

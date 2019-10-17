@@ -7,7 +7,7 @@
       (recur parent (conj result parent))
       result)))
 
-(defn- *-first [start end neighbors-fn peek-fn pop-fn]
+(defn- *-first [start end visit-fn peek-fn pop-fn]
   (loop [stack [start]
          visited? #{}
          parents {}]
@@ -17,22 +17,22 @@
       :else
       (let [cur (peek-fn stack)
             visited? (set (conj visited? cur))
-            neighbors (remove visited? (neighbors-fn cur))]
+            neighbors (remove visited? (visit-fn cur))]
         (recur (vec (into (remove visited? (pop-fn stack)) neighbors))
                visited?
                (merge parents (zipmap neighbors (repeat cur)) ))))))
 
 (defn depth-first
   "Traverses a graph via depth first. Accepts a visit-fn and a
-  neighbors-fn to get the neighboring nodes given a certain node."
-  [start end neighbors-fn]
-  (*-first start end neighbors-fn first (partial drop 1)))
+  visit-fn to get the neighboring nodes given a certain node."
+  [start end visit-fn]
+  (*-first start end visit-fn first rest))
 
 (defn breadth-first
   "Traverses a graph via depth first. Accepts a visit-fn and a
-  neighbors-fn to get the neighboring nodes given a certain node."
-  [start end neighbors-fn]
-  (*-first start end neighbors-fn peek pop))
+  visit-fn to get the neighboring nodes given a certain node."
+  [start end visit-fn]
+  (*-first start end visit-fn peek pop))
 
 (comment
   (let [g {:a [:c :b]

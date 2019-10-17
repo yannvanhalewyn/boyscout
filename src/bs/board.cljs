@@ -20,18 +20,18 @@
 ;; Graph
 
 (defn make [width height]
-  (let [coords (set (mapcat #(map vector (repeat %) (range height)) (range width)))]
+  (let [coords (set (mapcat #(map vector (repeat %) (range height)) (range width)))
+        edges (reduce
+               (fn [out [x y :as pos]]
+                 (let [neighbors (set/intersection coords #{[x (dec y)]
+                                                            [(inc x) y]
+                                                            [x (inc y)]
+                                                            [(dec x) y]})]
+                   (assoc out pos neighbors)))
+               {} coords)]
     {:board/width width
      :board/height height
-     :board/edges
-     (reduce
-      (fn [out [x y :as pos]]
-        (let [neighbors (set/intersection coords #{[x (dec y)]
-                                                   [(inc x) y]
-                                                   [x (inc y)]
-                                                   [(dec x) y]})]
-          (assoc out pos neighbors)))
-      {} coords)}))
+     :board/edges edges}))
 
 (defn all-coordinates [board]
   (keys (:board/edges board)))
