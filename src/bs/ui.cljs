@@ -73,15 +73,16 @@
          [:img.float-left.p-3.mt-3.w-32.h-32 {:src (::alg/img-url current-alg)}]
          [:p.mt-4.font-serif.text-justify.text-gray-700.leading-relaxed
           (::alg/description current-alg)]
-         (for [check (checkmarks current-alg)]
-           ^{:key (:check/title check)}
-           [:div.mt-6.px-8.text-base
-            [:i.mdi.text-lg.mr-3
-             {:class (if (:check/checked? check)
-                       "mdi-check text-green-500"
-                       "mdi-close text-red-500")}]
-            [:span.font-sans.text-gray-900.font-semibold.tracking-wider (:check/title check)]
-            [:p.pl-8.mt-2.text-base.text-gray-700 (:check/body check)]])
+         [:div.bg-gray-200..pt-1.pb-3.mt-3.rounded-sm
+          (for [check (checkmarks current-alg)]
+            ^{:key (:check/title check)}
+            [:div.mt-6.px-8.text-base
+             [:i.mdi.text-lg.mr-3
+              {:class (if (:check/checked? check)
+                        "mdi-check text-green-500"
+                        "mdi-close text-red-500")}]
+             [:span.font-sans.text-gray-900.font-semibold.tracking-wider (:check/title check)]
+             [:p.pl-8.mt-2.text-base.text-gray-700 (:check/body check)]])]
          (when @modal?
            [select-algorithm-modal {:on-close #(reset! modal? false)
                                     :on-change #(db/update! state assoc :db/current-alg %)
