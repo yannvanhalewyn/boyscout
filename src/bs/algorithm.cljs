@@ -9,31 +9,34 @@
            ::weighted? true
            ::shortest-path? true
            ::img-url (u/resource-path "img/dijkstra.svg")
-           ::description (str "Dijkstra is a famous algorithm conceived by "
-                              "computer scientist Edsger W. Dijkstra published in "
-                              "1956. It is one of the most famous pathfinding "
-                              "algorithms for weighted graphs, and is used in road "
-                              "networks, IP routing, geolocation, telephone "
-                              "networks and more.")}
+           ::description (str "Dijkstra is the father of pathfinding algorithms. It "
+                              "was conceived by computer scientist Edsger W. "
+                              "Dijkstra published in 1956 and is one of the most "
+                              "famous pathfinding algorithms for weighted graphs, "
+                              "and is used in road networks, IP routing, geolocation, "
+                              "telephone networks and more.")}
           {::name "Depth First Search"
-           ::key ::depth-first
            ::short-name "DFS"
+           ::key ::depth-first
            ::img-url (u/resource-path "img/depth-first.svg")
            ::description (str "Depth First Search is one of the best known "
                               "algorithms for searching tree or graph data "
                               "structures. The algorithm will explore as far "
                               "as possible along each branch before backtracking "
-                              "or until it reaches the target.")}
+                              "or until it reaches the target. Because of this, it "
+                              "is a bad choice for pathfinding.")}
           {::name "Breadth First Search"
-           ::key ::breadth-first
            ::short-name "BFS"
+           ::key ::breadth-first
+           ::shortest-path? true
            ::img-url (u/resource-path "img/breadth-first.svg")
            ::description (str "Breadth First Search is a very similar  algorithm "
                               "to it's brother, Depth, differencing only in how "
                               "the unvisited nodes are prioritised. Where in DFS "
                               "a branch is fully explored until the end, Breadth "
                               "First will explore every nearest neighbor before "
-                              "going deeper into any branch.")}])
+                              "going deeper into any branch. This makes it more "
+                              "suitable for pathfinding.")}])
 
 (defmulti process
   "Traverses the board graph using a specified algorithm. Will return
