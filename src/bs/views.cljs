@@ -21,11 +21,13 @@
 
 (defn algorithm-summary [{::alg/keys [name description] :as alg}]
   [:div
-   [:div
-    [:i.mdi.mdi-graph-outline.text-2xl.text-blue-800]
-    [:h1.ml-1.inline-block.text-2xl.text-bold.text-gray-800 name]]
+   [:div.w-full.flex.justify-between.items-center
+    [:div
+     [:i.mdi.mdi-graph-outline.text-2xl.text-blue-800]
+     [:h1.ml-1.inline-block.text-2xl.text-bold.text-gray-800 name]]
+    [:a.u-link "Change"]]
+   [:img.float-left.p-3.mt-3.w-32.h-32 {:src (::alg/img-url alg)}]
    [:p.mt-4.font-serif.text-justify.text-gray-700.leading-relaxed description]
-
    (for [check (checkmarks alg)]
      ^{:key (:check/title check)}
      [:div.mt-6.px-8.text-base

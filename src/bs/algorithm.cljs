@@ -3,13 +3,33 @@
             [bs.algorithms.dijkstra :as dijkstra]
             [bs.algorithms.depth-first :as depth-first]))
 
-(def ALL [{::key ::dijkstra      ::name "Dijkstra"
-           ::weighted? true      ::shortest-path? true
-           ::description  "Dijkstra is a famous algorithm from Edsger W. Dijkstra published in 1956. It is one of the most famous pathfinding algorithms for weighted graphs, and is used in road networks, IP routing, geolocation, telephone networks and more."}
-          {::key ::depth-first   ::name "Depth First Search"
-           ::description "Depth First Search is one of the best known algorithms for searching tree or graph data structures. The algorithm will explore as far as possible along each branch before backtracking or until it reaches the target."}
-          {::key ::breadth-first ::name "Breadth First Search"
-           ::description "Breadth First Search is a very similar algorithm to it's brother, Depth, differencing only in how the unvisited nodes are prioritised. Where in DFS a branch is fully explored until the end, Breadth First will explore every nearest neighbor before going deeper into any branch."}])
+(def ALL [{::name "Dijkstra"
+           ::key ::dijkstra
+           ::weighted? true
+           ::shortest-path? true
+           ::img-url "/img/dijkstra.svg"
+           ::description (str "Dijkstra is a famous algorithm from Edsger W. "
+                              "Dijkstra published in 1956. It is one of the "
+                              "most famous pathfinding algorithms for weighted "
+                              "graphs, and is used in road networks, IP routing, "
+                              "geolocation, telephone networks and more.")}
+          {::name "Depth First Search"
+           ::key ::depth-first
+           ::img-url "/img/depth-first.svg"
+           ::description (str "Depth First Search is one of the best known "
+                              "algorithms for searching tree or graph data "
+                              "structures. The algorithm will explore as far "
+                              "as possible along each branch before backtracking "
+                              "or until it reaches the target.")}
+          {::name "Breadth First Search"
+           ::key ::breadth-first
+           ::img-url "/img/breadth-first.svg"
+           ::description (str "Breadth First Search is a very similar  algorithm "
+                              "to it's brother, Depth, differencing only in how "
+                              "the unvisited nodes are prioritised. Where in DFS "
+                              "a branch is fully explored until the end, Breadth "
+                              "First will explore every nearest neighbor before "
+                              "going deeper into any branch.")}])
 
 (defmulti process
   "Traverses the board graph using a specified algorithm. Will return
