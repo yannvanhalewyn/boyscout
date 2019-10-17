@@ -2,6 +2,7 @@
   (:require [bs.board :as board]
             [bs.algorithm :as alg]
             [bs.animation :as animation]
+            [bs.views :as views]
             [bs.utils :as u]
             [reagent.core :as r]))
 
@@ -154,8 +155,11 @@
      {:on-click #(reset! state (new-db))} "Reset"]]
    (when-let [e (:db/error @state)]
      [:div.alert [:p e]])
-   [:div.container.mx-auto.tracking-wide.mt-8
-    [board-table state]]])
+   [:div.flex.mt-8.flex-wrap
+    [:div.px-8 {:class "xl:w-1/4"}
+     [views/algorithm-summary (:db/current-alg @state)]]
+    [:div.px-3.mt-8.lg:mt-0 {:class "xl:w-3/4"}
+     [board-table state]]]])
 
 (defn ^:dev/after-load render! []
   (r/render [root (r/atom (new-db))] (.getElementById js/document "app")))
