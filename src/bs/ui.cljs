@@ -23,16 +23,34 @@
       :check/body (str "The result is a correct path, but is not guaranteed to "
                        "be the shortest one.")})])
 
+(defn- modal-checkmarks [alg text-color]
+  [:<>
+   (for [check (checkmarks alg)]
+     ^{:key (:check/title check)}
+     [:div.ml-1
+      [:i.mdi.text-xl.align-middle
+       {:class (if (:check/checked? check)
+                 ["mdi-check" "text-green-400"]
+                 ["mdi-close" "text-red-600"])}]
+      [:span.ml-2 {:class text-color} (:check/title check)]])])
+
 (defn- select-algorithm-modal [{:keys [on-close on-change current-alg]}]
   [:div.modal.fixed.w-full.h-full.top-0.left-0.flex.items-center.justify-center
+
+   ;; Background click
    [:div.absolute.w-full.h-full.bg-gray-900.opacity-50
     {:on-click on-close}]
    [:div.bg-white.md:max-w-6xl.mx-auto.rounded.shadow-lg.z-50.overflow-y-auto
+
+    ;; Header
     [:h1.text-3xl.py-4.px-10.text-indigo-900.shadow-inner.shadow-2xl.bg-gray-200 "Pick algorithm"]
+
     [:div.py-4.text-left.px-6
      [:div.flex
       (for [{::alg/keys [key name description img-url] :as alg} alg/ALL
             :let [selected? (= key (::alg/key current-alg))]]
+
+        ;; Algorithm option
         ^{:key key}
         [:a.p-4.pb-12.m-2.relative.cursor-default.text-gray-900
          {:class (when selected? " bg-indigo-500 rounded")}
@@ -40,19 +58,25 @@
          [:h1.text-xl.font-bold
           {:class (when selected? "text-indigo-100")}
           name]
-         [:p.font-serif.mb-12.mt-2.leading-relaxed.tracking-wide
+         [:p.font-serif.mb-24.mt-2.leading-relaxed.tracking-wide
           {:class (if selected?
                     "text-indigo-200"
                     "text-gray-700")}
           description]
-         (if selected?
-           [:div.absolute.bottom-0.mb-4.py-2.-ml-12.border.rounded
-            {:style {:left "50%"}}
-            [:span.px-3.py-2.text-gray-200 "SELECTED"]]
-           [:div.absolute.w-full.bottom-0.text-center
-            [:button.mb-5.px-3.py-2.shadow-xl.shadow-inner.bg-indigo-600.tracking-wider.rounded.text-white.hover:bg-indigo-400
-             {:on-click #(on-change alg)}
-             "Select"]])])]
+
+         ;; Checkmarks and select(ed) button
+         [:div.absolute.w-full.bottom-0
+          [:div.relative.bottom-0.left-0.flex.items-center.justify-between.mx-8.border-t-4.border-gray-200
+           (if selected?
+             [:<>
+              [:div.mt-6.mb-6 [modal-checkmarks alg "text-white"]]
+              [:div.py-2.px-3.border.rounded.text-gray-200 [:span "SELECTED"]]]
+             [:<>
+              [:div.mt-6.mb-6 [modal-checkmarks alg "text-gray-800"]]
+              [:div [:button.px-3.py-2.shadow-xl.shadow-inner.bg-indigo-600.tracking-wider.rounded.text-white.hover:bg-indigo-400
+                     {:on-click #(on-change alg)}
+                     "Select"]]])]]])]
+
      [:button.float-right.px-4.bg-transparent.py-3.rounded-lg
       {:on-click on-close}
       "Close"]
@@ -109,7 +133,7 @@
           (for [check (checkmarks current-alg)]
             ^{:key (:check/title check)}
             [:div.my-3.px-4.text-base.text-center
-             [:i.mdi.text-lg.mr-1
+             [:i.mdi.text-lg.mr-2
               {:class (if (:check/checked? check)
                         "mdi-check text-green-500"
                         "mdi-close text-red-500")}]
