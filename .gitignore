@@ -2,6 +2,6 @@
 /.nrepl-port
 /node_modules/
 /.shadow-cljs/
-target/
 /resources/public/js/
 /resources/public/css/
+build/

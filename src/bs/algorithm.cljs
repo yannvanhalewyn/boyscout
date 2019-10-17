@@ -1,13 +1,14 @@
 (ns bs.algorithm
   (:require [bs.board :as board]
             [bs.algorithms.dijkstra :as dijkstra]
-            [bs.algorithms.depth-first :as depth-first]))
+            [bs.algorithms.depth-first :as depth-first]
+            [bs.utils :as u]))
 
 (def ALL [{::name "Dijkstra"
            ::key ::dijkstra
            ::weighted? true
            ::shortest-path? true
-           ::img-url "/img/dijkstra.svg"
+           ::img-url (u/resource-path "img/dijkstra.svg")
            ::description (str "Dijkstra is a famous algorithm from Edsger W. "
                               "Dijkstra published in 1956. It is one of the "
                               "most famous pathfinding algorithms for weighted "
@@ -15,7 +16,7 @@
                               "geolocation, telephone networks and more.")}
           {::name "Depth First Search"
            ::key ::depth-first
-           ::img-url "/img/depth-first.svg"
+           ::img-url (u/resource-path "img/depth-first.svg")
            ::description (str "Depth First Search is one of the best known "
                               "algorithms for searching tree or graph data "
                               "structures. The algorithm will explore as far "
@@ -23,7 +24,7 @@
                               "or until it reaches the target.")}
           {::name "Breadth First Search"
            ::key ::breadth-first
-           ::img-url "/img/breadth-first.svg"
+           ::img-url (u/resource-path "img/breadth-first.svg")
            ::description (str "Breadth First Search is a very similar  algorithm "
                               "to it's brother, Depth, differencing only in how "
                               "the unvisited nodes are prioritised. Where in DFS "

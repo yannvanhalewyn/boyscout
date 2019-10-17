@@ -15,6 +15,6 @@
                  :devtools {:http-port 8081
                             :http-root "resources/public/js/test"}}
           :prod {:target :browser
-                 :output-dir "target/cljs-advanced"
+                 :output-dir "build/js"
                  :modules {:main {:init-fn bs.core/main!}}
                  :compiler-options {:optimizations :advanced}}}}

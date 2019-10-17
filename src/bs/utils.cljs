@@ -6,6 +6,15 @@
 (defn remove-class! [id class]
   (.. js/document (getElementById id) -classList (remove class)))
 
+(defn resource-path
+  "Bit hacky for now, Github pages and my dev setup have a bit
+  different file structure, so just check if it's a dev or prod build
+  and return a prefix for any resource"
+  [filename]
+  (if js/goog.DEBUG
+    (str "/" filename)
+    (str "./build/" filename)))
+
 (defn split-by
   "Returns a vector with two elements: the first is the collection of
   elements for which the predicate returned a truthy value, the second
