@@ -32,3 +32,18 @@ cp-img:
 	cp -r resources/public/img/* build/img
 
 build: $(TARGET_JS) $(TARGET_CSS) index.html cp-img
+
+stash:
+	@git diff --quiet || git stash save "Stash before release"
+
+release: stash build
+	git checkout master
+	@echo "Creating new gh-pages branch"
+	git branch -D gh-pages || echo ''
+	git checkout -b gh-pages
+	@echo "Creating release commit"
+	git add build index.html
+	git commit -m "Release"
+	@echo "Pushing release to GitHub"
+	git push -f origin gh-pages
+	git checkout master
