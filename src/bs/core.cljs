@@ -157,7 +157,7 @@
      [:div.alert [:p e]])
    [:div.flex.mt-8.flex-wrap
     [:div.px-8 {:class "xl:w-1/4"}
-     [views/algorithm-summary (:db/current-alg @state)]]
+     [views/algorithm-summary state]]
     [:div.px-3.mt-8.lg:mt-0 {:class "xl:w-3/4"}
      [board-table state]]]])
 

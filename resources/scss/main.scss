@@ -9,6 +9,10 @@ body {
   font-family: 'Raleway', sans-serif; /* YEAH */
 }
 
+.modal {
+  animation: appear 0.3s ease-out;
+}
+
 button:active, button:focus, select:active, select:focus {
   outline: none;
 }
