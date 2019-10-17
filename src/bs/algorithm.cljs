@@ -17,6 +17,7 @@
                               "networks and more.")}
           {::name "Depth First Search"
            ::key ::depth-first
+           ::short-name "DFS"
            ::img-url (u/resource-path "img/depth-first.svg")
            ::description (str "Depth First Search is one of the best known "
                               "algorithms for searching tree or graph data "
@@ -25,6 +26,7 @@
                               "or until it reaches the target.")}
           {::name "Breadth First Search"
            ::key ::breadth-first
+           ::short-name "BFS"
            ::img-url (u/resource-path "img/breadth-first.svg")
            ::description (str "Breadth First Search is a very similar  algorithm "
                               "to it's brother, Depth, differencing only in how "

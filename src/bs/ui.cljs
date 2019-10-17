@@ -34,8 +34,8 @@
       (for [{::alg/keys [key name description img-url] :as alg} alg/ALL
             :let [selected? (= key (::alg/key current-alg))]]
         ^{:key key}
-        [:a.p-4.relative.cursor-default.text-gray-900.shado-inner
-         {:class (when selected? "bg-indigo-500 rounded")}
+        [:a.p-4.m-2.relative.cursor-default.text-gray-900.shado-inner
+         {:class (when selected? " bg-indigo-500 rounded")}
          [:img.float-right.pl-4.w-32.h-32 {:src img-url}]
          [:h1.text-xl.text-bold
           {:class (when selected? "text-indigo-100")}
@@ -47,7 +47,7 @@
           description]
          (when-not selected?
            [:div.absolute.w-full.bottom-0.text-center
-            [:button.px-3.shadow-xl.shadow-inner.bg-indigo-600.py-2.rounded.text-white.hover:bg-indigo-400
+            [:button.px-3.py-2.shadow-xl.shadow-inner.bg-indigo-600.tracking-wider.rounded.text-white.hover:bg-indigo-400
              {:on-click #(on-change alg)}
              "Select"]])])]
      [:button.float-right.px-4.bg-transparent.py-3.rounded-lg
@@ -55,41 +55,70 @@
       "Close"]
      [:div.clearfix]]]])
 
-(defn algorithm-summary
+(defn sidebar
   "A little side panel on the left with the algorithm name description
   and some facts. Can also open a modal and change the selected algorithm"
   []
   (let [modal? (r/atom false)]
     (fn [state]
-      (let [{:db/keys [current-alg]} @state]
+      (let [{:db/keys [current-alg]} @state
+            animating? (db/animating? @state)]
         [:div
-         [:div.w-full.flex.justify-between.items-center
+         [:div.py-6.px-6.bg-teal-500.rounded
+
+          ;; Header
+          [:div.w-full.flex.justify-between.items-center
+           [:h1.ml-1.inline-block.text-2xl.text-bold.text-white
+            (::alg/name current-alg)]
+           (when-not (db/animating? @state)
+             [:button.btn.text-sm.text-white.hover:bg-teal-400
+              {:on-click #(reset! modal? true)} "Change"])]
+
+          ;; Body
           [:div
-           [:i.mdi.mdi-graph-outline.text-2xl.text-blue-800]
-           [:h1.ml-1.inline-block.text-2xl.text-bold.text-gray-800
-            (::alg/name current-alg)]]
-          (when-not (db/animating? @state)
-            [:a.u-link {:on-click #(reset! modal? true)} "Change"])]
-         [:img.float-left.p-3.mt-3.w-32.h-32 {:src (::alg/img-url current-alg)}]
-         [:p.mt-4.font-serif.text-justify.text-gray-700.leading-relaxed
-          (::alg/description current-alg)]
-         [:div.bg-gray-200..pt-1.pb-3.mt-3.rounded-sm
+           [:img.float-left.p-2.pl-0.mt-4.w-24.h-24 {:src (::alg/img-url current-alg)}]
+           [:p.mt-4.font-serif.text-justify.text-teal-200.leading-relaxed
+            (::alg/description current-alg)]]
+
+          ;; Buttons footer
+          [:div.text-center.h-full.mt-5
+           (if animating?
+             [:button.btn.btn--red.text-sm.mx-4
+              {:on-click #(db/cancel-animation! state)}
+              [:i.mdi.mdi-stop-circle-outline.animate-pulsing]
+              [:span.pl-3.font-bold.text-base "Stop"]]
+             [:div.mt-8
+              [:button.btn.text-lg.bg-white.text-teal-600.text-bold.hover:bg-teal-600.hover:text-white
+               {:on-click #(db/animate! state)}
+               (str "Visualize " (or (::alg/short-name current-alg)
+                                     (::alg/name current-alg)))]
+              [:div.text-center.mt-1
+               [:button.mx-4.text-white.underline.hover:no-underline
+                {:on-click #(reset! state (db/new-db))
+                 :class (when (or animating? (= (:db/board @state)
+                                                (:db/board (db/new-db))))
+                          "opacity-0")}
+                "reset"]]])]]
+
+         ;; Checkmarks
+         [:div.mx-12.py-2.bg-teal-100.rounded-lg.relative.shadow-lg
+          {:style {:left 180 :top -40}}
           (for [check (checkmarks current-alg)]
             ^{:key (:check/title check)}
-            [:div.mt-6.px-8.text-base
-             [:i.mdi.text-lg.mr-3
+            [:div.my-3.px-4.text-base.text-center
+             [:i.mdi.text-lg.mr-1
               {:class (if (:check/checked? check)
                         "mdi-check text-green-500"
                         "mdi-close text-red-500")}]
              [:span.font-sans.text-gray-900.font-semibold.tracking-wider (:check/title check)]
-             [:p.pl-8.mt-2.text-base.text-gray-700 (:check/body check)]])]
+             [:p.pl-1.mt-1.text-left.text-base.text-gray-700 (:check/body check)]])]
          (when @modal?
            [select-algorithm-modal {:on-close #(reset! modal? false)
                                     :on-change #(db/update! state assoc :db/current-alg %)
                                     :current-alg current-alg}])]))))
 
 (defn board-table
-  "The main animating attraction"
+  "The main animated attraction"
   [state]
   (let [{:db/keys [board alg-result] :as st} @state
         {:board/keys [width height] :as board} board
