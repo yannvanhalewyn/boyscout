@@ -9,25 +9,25 @@
   "Wether or not the algorithm output should be recalculated. This
   should happen when there has been an animation and if either the
   board or selected algorithm have changed."
-  [old-state new-state]
-  (and (contains? old-state :db/alg-result)
-       (or (not (identical? (:db/board old-state)
-                            (:db/board new-state)))
-           (not (identical? (:db/current-alg old-state)
-                            (:db/current-alg new-state))))))
+  [old-db new-db]
+  (and (contains? old-db :db/alg-result)
+       (or (not (identical? (:db/board old-db)
+                            (:db/board new-db)))
+           (not (identical? (:db/current-alg old-db)
+                            (:db/current-alg new-db))))))
 
 (defn- process-alg
-  "Takes the current algorithm and the current board from the state
+  "Takes the current algorithm and the current board from the db
   and processes the current algorithm on it."
   [{:db/keys [current-alg board]}]
   (alg/process (::alg/key current-alg) board))
 
-(defn- animate!* [state {::alg/keys [path visitation-order] :as alg-result}]
+(defn- animate!* [db {::alg/keys [path visitation-order] :as alg-result}]
   (let [mk-step #(animation/make-step (board/cell-id %1) %2 (* %3 ANIMATION_SPEED))]
     (animation/start!
      (concat (map #(mk-step % "cell--visited-animated" 1) visitation-order)
              (map #(mk-step % "cell--path-animated" 4) path))
-     #(swap! state assoc :db/animation %
+     #(swap! db assoc :db/animation %
              :db/alg-result alg-result))))
 
 ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
@@ -40,35 +40,35 @@
                    (board/set-target target))
      :db/current-alg (first alg/ALL)}))
 
-(defn hide-error! [state]
-  (swap! state dissoc :db/error))
+(defn hide-error! [db]
+  (swap! db dissoc :db/error))
 
-(defn show-error! [state err]
-  (swap! state assoc :db/error err)
-  (js/setTimeout #(hide-error! state) 5000))
+(defn show-error! [db err]
+  (swap! db assoc :db/error err)
+  (js/setTimeout #(hide-error! db) 5000))
 
 (defn update!
-  "A middleware like way to update the app-state. If the algorithm or
+  "A middleware like way to update the app-db. If the algorithm or
   the board changes, recalculate the algorithm"
-  [state f & args]
-  (let [old-state @state
-        new-state (apply f @state args)]
-    (if (recalculate-alg? old-state new-state)
-      (reset! state (assoc new-state :db/alg-result (process-alg new-state)))
-      (reset! state new-state))))
+  [db f & args]
+  (let [old-db @db
+        new-db (apply f @db args)]
+    (if (recalculate-alg? old-db new-db)
+      (reset! db (assoc new-db :db/alg-result (process-alg new-db)))
+      (reset! db new-db))))
 
 (defn animate!
   "Calculates the algorithm result of the current board and selected
   algorithm, and kicks-off an animation process."
-  [state]
-  (let [{::alg/keys [path] :as result} (process-alg @state)]
+  [db]
+  (let [{::alg/keys [path] :as result} (process-alg @db)]
     (if (empty? path)
-      (show-error! state "Target is unreachable")
-      (swap! state assoc :db/animation
-             (animate!* state result)))))
+      (show-error! db "Target is unreachable")
+      (swap! db assoc :db/animation
+             (animate!* db result)))))
 
-(defn animating? [state]
-  (animation/running? (:db/animation state)))
+(defn animating? [db]
+  (animation/running? (:db/animation db)))
 
-(defn cancel-animation! [state]
-  (swap! state update :db/animation animation/cancel!))
+(defn cancel-animation! [db]
+  (swap! db update :db/animation animation/cancel!))

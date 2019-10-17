@@ -87,9 +87,9 @@
   and some facts. Can also open a modal and change the selected algorithm"
   []
   (let [modal? (r/atom false)]
-    (fn [state]
-      (let [{:db/keys [current-alg]} @state
-            animating? (db/animating? @state)]
+    (fn [db]
+      (let [{:db/keys [current-alg]} @db
+            animating? (db/animating? @db)]
         [:div
          [:div.py-6.px-6.bg-teal-500.rounded
 
@@ -97,7 +97,7 @@
           [:div.w-full.flex.justify-between.items-center
            [:h1.ml-1.inline-block.text-2xl.text-white
             (::alg/name current-alg)]
-           (when-not (db/animating? @state)
+           (when-not (db/animating? @db)
              [:button.btn.text-sm.text-white.hover:bg-teal-400
               {:on-click #(reset! modal? true)} "Change"])]
 
@@ -111,18 +111,18 @@
           [:div.text-center.h-full.mt-5
            (if animating?
              [:button.btn.btn--red.text-sm.mx-4
-              {:on-click #(db/cancel-animation! state)}
+              {:on-click #(db/cancel-animation! db)}
               [:i.mdi.mdi-stop-circle-outline.animate-pulsing]
               [:span.pl-3.font-bold.text-base "Stop"]]
              [:div.mt-8
               [:button.btn.text-lg.bg-white.text-teal-600.font-bold.hover:bg-teal-600.hover:text-white
-               {:on-click #(db/animate! state)}
+               {:on-click #(db/animate! db)}
                (str "Visualize " (or (::alg/short-name current-alg)
                                      (::alg/name current-alg)))]
               [:div.text-center.mt-1
                [:button.mx-4.text-white.underline.hover:no-underline
-                {:on-click #(reset! state (db/new-db))
-                 :class (when (or animating? (= (:db/board @state)
+                {:on-click #(reset! db (db/new-db))
+                 :class (when (or animating? (= (:db/board @db)
                                                 (:db/board (db/new-db))))
                           "opacity-0")}
                 "reset"]]])]]
@@ -142,13 +142,13 @@
          (when @modal?
            [select-algorithm-modal {:on-close #(reset! modal? false)
                                     :on-change #(do (reset! modal? false)
-                                                    (db/update! state assoc :db/current-alg %))
+                                                    (db/update! db assoc :db/current-alg %))
                                     :current-alg current-alg}])]))))
 
 (defn board-table
   "The main animated attraction"
-  [state]
-  (let [{:db/keys [board alg-result] :as st} @state
+  [db]
+  (let [{:db/keys [board alg-result] :as st} @db
         {:board/keys [width height] :as board} board
         animating? (db/animating? st)
         {::alg/keys [path visitation-order]} (when-not animating? alg-result)
@@ -163,23 +163,23 @@
                       (let [type (cond (board/source? board pos) :drag/source
                                        (board/target? board pos) :drag/target
                                        :else :drag/wall)]
-                        (db/update! state assoc :db/dragging type)
+                        (db/update! db assoc :db/dragging type)
                         (when (= :drag/wall type)
-                          (db/update! state update :db/board board/make-wall pos))))
+                          (db/update! db update :db/board board/make-wall pos))))
         drag-to!     (fn [pos]
                        (when-let [f (case (:db/dragging st)
                                       :drag/source board/set-source
                                       :drag/target board/set-target
                                       nil)]
-                         (db/update! state update :db/board f pos))
+                         (db/update! db update :db/board f pos))
                        (when (= :drag/wall (:db/dragging st))
                          (u/add-class! (board/cell-id pos) "cell--wall-animated")
                          (conj! new-walls-cache pos)))
         end-drag!     (fn []
                         (when (contains? st :db/dragging)
-                          (db/update! state dissoc :db/dragging)
+                          (db/update! db dissoc :db/dragging)
                           (when-let [new-walls (seq (persistent! new-walls-cache))]
-                            (db/update! state update :db/board board/make-walls new-walls))))]
+                            (db/update! db update :db/board board/make-walls new-walls))))]
     [:table {:on-mouse-leave end-drag!}
      [:tbody {:class (when animating? "cursor-not-allowed")}
       (for [y (range height)]
