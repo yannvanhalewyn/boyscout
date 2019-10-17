@@ -3,12 +3,14 @@
             [bs.ui :as ui]
             [reagent.core :as r]))
 
+(defonce state (r/atom (db/new-db)))
+
 (defn root [state]
   [:<>
    (when-let [e (:db/error @state)]
      [:div.alert.w-full.text-center
       [:button.mdi.mdi-close.float-right.text-red-700.text-lg
-       {:on-click #(swap! state dissoc :db/error)}]
+       {:on-click #(db/hide-error! state)}]
       [:p e]])
    [:div.px-16.py-3.bg-blue-600.text-center.text-white.text-3xl.font-bold
     [:i.mdi.mdi-tent]
@@ -20,6 +22,6 @@
      [ui/board-table state]]]])
 
 (defn ^:dev/after-load render! []
-  (r/render [root (r/atom (db/new-db))] (.getElementById js/document "app")))
+  (r/render [root state] (.getElementById js/document "app")))
 
 (def main! render!)

@@ -40,9 +40,12 @@
                    (board/set-target target))
      :db/current-alg (first alg/ALL)}))
 
+(defn hide-error! [state]
+  (swap! state dissoc :db/error))
+
 (defn show-error! [state err]
   (swap! state assoc :db/error err)
-  (js/setTimeout #(swap! state dissoc :db/error) 5000))
+  (js/setTimeout #(hide-error! state) 5000))
 
 (defn update!
   "A middleware like way to update the app-state. If the algorithm or
