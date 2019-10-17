@@ -65,14 +65,6 @@ button:active, button:focus, select:active, select:focus {
   @apply border text-sm font-semibold rounded px-4 py-2 leading-normal shadow-md;
 }
 
-.btn--header {
-  @apply text-white mx-4
-}
-
-.btn--header:hover {
-  @apply bg-white text-blue-700
-}
-
 .btn--red {
   @apply bg-red-500 text-white border-none
 }
