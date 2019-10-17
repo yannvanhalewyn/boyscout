@@ -9,11 +9,12 @@
            ::weighted? true
            ::shortest-path? true
            ::img-url (u/resource-path "img/dijkstra.svg")
-           ::description (str "Dijkstra is a famous algorithm from Edsger W. "
-                              "Dijkstra published in 1956. It is one of the "
-                              "most famous pathfinding algorithms for weighted "
-                              "graphs, and is used in road networks, IP routing, "
-                              "geolocation, telephone networks and more.")}
+           ::description (str "Dijkstra is a famous algorithm conceived by "
+                              "computer scientist Edsger W. Dijkstra published in "
+                              "1956. It is one of the most famous pathfinding "
+                              "algorithms for weighted graphs, and is used in road "
+                              "networks, IP routing, geolocation, telephone "
+                              "networks and more.")}
           {::name "Depth First Search"
            ::key ::depth-first
            ::img-url (u/resource-path "img/depth-first.svg")
