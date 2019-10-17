@@ -17,6 +17,7 @@ $(TARGET_JS): $(SRC_FILES)
 	shadow-cljs release prod
 
 $(TARGET_CSS): $(CSS_FILES)
+	@echo "---- Building css"
 	npx tailwind build $^ -o $@
 
 $(TARGET_DEV_CSS): $(CSS_FILES)
@@ -25,6 +26,9 @@ $(TARGET_DEV_CSS): $(CSS_FILES)
 index.html: resources/public/index.html
 	cat $^ | sed 's|css/application.css|build/css/application.css|' | sed 's|js/app|build/js|' | sed 's|favicon.ico|./resources/public/favicon.ico|' > $@
 
-build: $(TARGET_JS) $(TARGET_CSS) index.html
+cp-img:
 	@echo "---- Copying resources"
-	cp -r resources/public/img build/img
+	@[ -d build/img ] || mkdir build/img
+	cp -r resources/public/img/* build/img
+
+build: $(TARGET_JS) $(TARGET_CSS) index.html cp-img

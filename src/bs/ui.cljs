@@ -25,8 +25,8 @@
 
 (defn- select-algorithm-modal [{:keys [on-close on-change current-alg]}]
   [:div.modal.fixed.w-full.h-full.top-0.left-0.flex.items-center.justify-center
-   {:on-click on-close}
-   [:div.absolute.w-full.h-full.bg-gray-900.opacity-50]
+   [:div.absolute.w-full.h-full.bg-gray-900.opacity-50
+    {:on-click on-close}]
    [:div.bg-white.md:max-w-6xl.mx-auto.rounded.shadow-lg.z-50.overflow-y-auto
     [:h1.text-3xl.py-4.px-10.text-indigo-900.shadow-inner.shadow-2xl.bg-gray-200 "Pick algorithm"]
     [:div.py-4.text-left.px-6
@@ -34,10 +34,10 @@
       (for [{::alg/keys [key name description img-url] :as alg} alg/ALL
             :let [selected? (= key (::alg/key current-alg))]]
         ^{:key key}
-        [:a.p-4.m-2.relative.cursor-default.text-gray-900.shado-inner
+        [:a.p-4.pb-12.m-2.relative.cursor-default.text-gray-900
          {:class (when selected? " bg-indigo-500 rounded")}
          [:img.float-right.pl-4.w-32.h-32 {:src img-url}]
-         [:h1.text-xl.text-bold
+         [:h1.text-xl.font-bold
           {:class (when selected? "text-indigo-100")}
           name]
          [:p.font-serif.mb-12.mt-2.leading-relaxed.tracking-wide
@@ -45,9 +45,12 @@
                     "text-indigo-200"
                     "text-gray-700")}
           description]
-         (when-not selected?
+         (if selected?
+           [:div.absolute.bottom-0.mb-4.py-2.-ml-12.border.rounded
+            {:style {:left "50%"}}
+            [:span.px-3.py-2.text-gray-200 "SELECTED"]]
            [:div.absolute.w-full.bottom-0.text-center
-            [:button.px-3.py-2.shadow-xl.shadow-inner.bg-indigo-600.tracking-wider.rounded.text-white.hover:bg-indigo-400
+            [:button.mb-5.px-3.py-2.shadow-xl.shadow-inner.bg-indigo-600.tracking-wider.rounded.text-white.hover:bg-indigo-400
              {:on-click #(on-change alg)}
              "Select"]])])]
      [:button.float-right.px-4.bg-transparent.py-3.rounded-lg
@@ -68,7 +71,7 @@
 
           ;; Header
           [:div.w-full.flex.justify-between.items-center
-           [:h1.ml-1.inline-block.text-2xl.text-bold.text-white
+           [:h1.ml-1.inline-block.text-2xl.text-white
             (::alg/name current-alg)]
            (when-not (db/animating? @state)
              [:button.btn.text-sm.text-white.hover:bg-teal-400
@@ -88,7 +91,7 @@
               [:i.mdi.mdi-stop-circle-outline.animate-pulsing]
               [:span.pl-3.font-bold.text-base "Stop"]]
              [:div.mt-8
-              [:button.btn.text-lg.bg-white.text-teal-600.text-bold.hover:bg-teal-600.hover:text-white
+              [:button.btn.text-lg.bg-white.text-teal-600.font-bold.hover:bg-teal-600.hover:text-white
                {:on-click #(db/animate! state)}
                (str "Visualize " (or (::alg/short-name current-alg)
                                      (::alg/name current-alg)))]
@@ -111,10 +114,11 @@
                         "mdi-check text-green-500"
                         "mdi-close text-red-500")}]
              [:span.font-sans.text-gray-900.font-semibold.tracking-wider (:check/title check)]
-             [:p.pl-1.mt-1.text-left.text-base.text-gray-700 (:check/body check)]])]
+             [:p.pl-1.mt-1.text-left.text-base.text-teal-700 (:check/body check)]])]
          (when @modal?
            [select-algorithm-modal {:on-close #(reset! modal? false)
-                                    :on-change #(db/update! state assoc :db/current-alg %)
+                                    :on-change #(do (reset! modal? false)
+                                                    (db/update! state assoc :db/current-alg %))
                                     :current-alg current-alg}])]))))
 
 (defn board-table

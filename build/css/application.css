@@ -11365,18 +11365,7 @@ video {
    UI */
 
 body {
-  /* <link href="https://fonts.googleapis.com/css?family=Karla|Lato|Nanum+Gothic|Noto+Sans+KR|Oswald|Poppins|Raleway|Roboto+Slab|Ubuntu|Work+Sans&display=swap" rel="stylesheet"> */
-  /* font-family: 'Lato', sans-serif; YEAH */
-  /* font-family: 'Oswald', sans-serif; MAYBE */
-  /* font-family: 'Raleway', sans-serif; /\* YEAH *\/ */
-  /* font-family: 'Roboto Slab', serif; NOOOO */
-  /* font-family: 'Poppins', sans-serif; NO */
-  /* font-family: 'Ubuntu', sans-serif; YEAH */
-  /* font-family: 'Nanum Gothic', sans-serif; NO */
-  /* font-family: 'Work Sans', sans-serif; */
-  /* font-family: 'Noto Sans KR', sans-serif;  NO */
-  /* font-family: 'Karla', sans-serif; YEAH */
-  /* font-family: Roboto, -apple-system, BlinkMacSystemFont, "Segoe UI", sans-serif; */
+  font-family: 'Raleway', sans-serif; /* YEAH */
 }
 
 .modal {
@@ -11384,79 +11373,8 @@ body {
           animation: appear 0.3s ease-out;
 }
 
-/* .font-serif { */
-
-/*   font-family: 'Roboto Slab', serif; */
-
-/* } */
-
 button:active, button:focus, select:active, select:focus {
   outline: none;
-}
-
-.header {
-  display: flex;
-  align-items: center;
-  padding-left: 4rem;
-  padding-right: 4rem;
-  padding-top: 1rem;
-  padding-bottom: 1rem;
-  background-color: #3182ce
-}
-
-.logo-title {
-  background-image: url(../img/boyscout.svg);
-  background-repeat: no-repeat;
-  background-size: contain;
-  width: 1.5rem;
-  height: 1.5rem;
-  display: inline-block;
-}
-
-.icon-graph {
-  background-image: url(../img/graph.svg);
-  background-repeat: no-repeat;
-  background-size: contain;
-  width: 1.25rem;
-  height: 1.25rem;
-  display: inline-block;
-}
-
-.dropdown__select {
-  width: 14rem;
-  text-align: left;
-  letter-spacing: 0.025em;
-  font-size: 1.125rem;
-  padding-left: 0.75rem;
-  padding-right: 0.75rem;
-  padding-top: 0.25rem;
-  padding-bottom: 0.25rem;
-  color: #edf2f7
-}
-
-.dropdown__options {
-  border-radius: 0.25rem;
-  padding-top: 0.5rem;
-  padding-bottom: 0.5rem;
-  background-color: #fff;
-  position: fixed;
-  z-index: 10;
-  box-shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.1), 0 2px 4px -1px rgba(0, 0, 0, 0.06)
-}
-
-.dropdown__option {
-  display: block;
-  cursor: pointer;
-  padding-left: 1rem;
-  padding-right: 1rem;
-  padding-top: 0.5rem;
-  padding-bottom: 0.5rem;
-  color: #4a5568
-}
-
-.dropdown__option:hover {
-  background-color: #3182ce;
-  color: #fff
 }
 
 .alert {
@@ -11470,20 +11388,8 @@ button:active, button:focus, select:active, select:focus {
   position: fixed;
 }
 
-.u-link {
-  color: #2b6cb0;
-  text-decoration: underline;
-  cursor: pointer;
-}
-
-.u-link:hover {
-  color: #4299e1;
-  text-decoration: none;
-}
-
 .btn {
   border-width: 1px;
-  font-size: 0.875rem;
   font-weight: 600;
   border-radius: 0.25rem;
   padding-left: 1rem;
@@ -11491,7 +11397,8 @@ button:active, button:focus, select:active, select:focus {
   padding-top: 0.5rem;
   padding-bottom: 0.5rem;
   line-height: 1.5;
-  box-shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.1), 0 2px 4px -1px rgba(0, 0, 0, 0.06);
+  letter-spacing: 0.05em;
+  box-shadow: 0 1px 3px 0 rgba(0, 0, 0, 0.1), 0 1px 2px 0 rgba(0, 0, 0, 0.06);
 }
 
 .btn--red {
