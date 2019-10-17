@@ -1,8 +1,9 @@
 {
   "scripts": {
-    "watch": "shadow-cljs watch app test",
-    "build": "shadow-cljs release prod",
-    "css": "npx tailwind build resources/scss/main.scss -o resources/public/css/application.css"
+    "cljs": "shadow-cljs release prod",
+    "css": "npx tailwind build resources/scss/main.scss -o resources/public/css/application.css",
+    "watch:cljs": "shadow-cljs watch app test",
+    "watch:css": "yarn css && fsevent_watch -F ./resources/scss | xargs -I{} yarn css"
   },
   "dependencies": {
     "create-react-class": "^15.6.3",

@@ -29,8 +29,7 @@
   "Takes the current algorithm and the current board from the state
   and processes the current algorithm on it."
   [{:db/keys [current-alg board]}]
-  (alg/process (::alg/key current-alg) board
-               (:board/source board) (:board/target board)))
+  (alg/process (::alg/key current-alg) board))
 
 (defn- update!
   "A middleware like way to update the app-state. If the algorithm or
@@ -49,20 +48,20 @@
 
 (def SPEED 8)
 
-(defn- animate!* [state {::alg/keys [shortest-path visitation-order] :as alg-result}]
+(defn- animate!* [state {::alg/keys [path visitation-order] :as alg-result}]
   (let [steps (concat
                (map #(animation/make-step (cell-id %) "cell--visited-animated" SPEED)
                     visitation-order)
                (map #(animation/make-step (cell-id %) "cell--path-animated" (* SPEED 4))
-                    shortest-path))
+                    path))
         animation (animation/start! steps #(swap! state assoc
                                                   :db/animation %
                                                   :db/alg-result alg-result))]
     (swap! state assoc :db/animation animation)))
 
 (defn- animate! [state]
-  (let [{::alg/keys [shortest-path] :as result} (process-alg @state)]
-    (if (empty? shortest-path)
+  (let [{::alg/keys [path] :as result} (process-alg @state)]
+    (if (empty? path)
       (show-error! state "Target is unreachable")
       (animate!* state result))))
 
@@ -70,8 +69,8 @@
   (let [{:db/keys [board alg-result animation] :as st} @state
         {:board/keys [width height] :as board} board
         animating? (animation/running? animation)
-        {::alg/keys [shortest-path visitation-order]} (when-not animating? alg-result)
-        path? (let [s (set shortest-path)] #(contains? s %2))
+        {::alg/keys [path visitation-order]} (when-not animating? alg-result)
+        path? (let [s (set path)] #(contains? s %2))
         visited? (let [s (set visitation-order)] #(contains? s %2))
         ;; For react performance, don't swap in every wall while
         ;; dragging, but rather natively animate them, store them in a
@@ -98,8 +97,7 @@
                         (when (contains? st :db/dragging)
                           (update! state dissoc :db/dragging)
                           (when-let [new-walls (seq (persistent! new-walls-cache))]
-                            (update! state assoc :db/board
-                                     (reduce board/make-wall board new-walls)))))]
+                            (update! state update :db/board board/make-walls new-walls))))]
     [:table {:on-mouse-leave end-drag!}
      [:tbody {:class (when animating? "cursor-not-allowed")}
       (for [y (range height)]
@@ -110,8 +108,8 @@
            ^{:key x}
            [:td.cell
             {:id (cell-id pos)
-             :class (for [[f v] {board/source? "cell--source-animated"
-                                 board/target? "cell--target-animated"
+             :class (for [[f v] {board/source? "cell--source"
+                                 board/target? "cell--target"
                                  board/wall? "cell--wall"
                                  path? "cell--path"
                                  visited? "cell--visited"}
