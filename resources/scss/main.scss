@@ -94,20 +94,6 @@ button:active, button:focus, select:active, select:focus {
   }
 }
 
-@keyframes grow {
-  0% {
-    transform: scale(.3);
-  }
-
-  50% {
-    transform: scale(1.2);
-  }
-
-  100% {
-    transform: scale(1.0);
-  }
-}
-
 @keyframes pulsing {
   0% {
     transform: scale(1.6);

@@ -68,3 +68,8 @@
 
 (defn wall? [board pos]
   (empty? (get-in board [:board/edges pos])))
+
+(defn cell-id
+  "The id used to refer to this cell's html node"
+  [[x y]]
+  (str "cell-" x "-" y))
