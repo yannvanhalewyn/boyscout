@@ -125,7 +125,7 @@
                                      (::alg/name current-alg)))]
               [:div.text-center.mt-1
                [:button.mx-4.text-white.underline.hover:no-underline
-                {:on-click #(reset! db (db/new-db))
+                {:on-click #(db/reset-board! db)
                  :class (when (or animating? (= (:db/board @db)
                                                 (:db/board (db/new-db))))
                           "opacity-0")}

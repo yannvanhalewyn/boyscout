@@ -40,6 +40,9 @@
                    (board/set-target target))
      :db/current-alg (first alg/ALL)}))
 
+(defn reset-board! [db]
+  (swap! db assoc :db/board (:db/board (new-db))))
+
 (defn hide-error! [db]
   (swap! db dissoc :db/error))
 
