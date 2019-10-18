@@ -17,8 +17,10 @@
     [:h1.ml-3.inline-block "Boyscout"]]
    [:div.flex.mt-8.flex-wrap
     [:div.px-8 {:class "xl:w-1/4"}
+   [:div.flex.mt-8.flex-wrap.max-w-7xl.m-auto
+    [:div.px-8 {:class "xl:w-1/3"}
      [ui/sidebar db]]
-    [:div.px-3.mt-8.lg:mt-0 {:class "xl:w-3/4"}
+    [:div.px-3.mt-8.lg:mt-0 {:class "xl:w-2/3"}
      [ui/board-table db]]]])
 
 (defn ^:dev/after-load render! []

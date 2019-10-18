@@ -62,11 +62,15 @@ button:active, button:focus, select:active, select:focus {
 }
 
 .max-w-7xl {
-  max-width: 90rem;
+  max-width: 96rem;
 }
 
 .w-72 {
   width: 18rem;
+}
+
+.h-96 {
+  height: 28rem;
 }
 
 /* ============================================================================
@@ -78,8 +82,8 @@ table {
 
 .cell {
   cursor: crosshair;
-  width: 23px;
-  height: 23px;
+  width: 22px;
+  height: 22px;
   border: 1px solid rgb(175, 216, 248);
 }
 

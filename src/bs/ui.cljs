@@ -95,11 +95,11 @@
       (let [{:db/keys [current-alg]} @db
             animating? (db/animating? @db)]
         [:div
-         [:div.py-6.px-6.bg-teal-500.rounded
+         [:div.relative.py-6.px-6.h-96.bg-teal-500.rounded
 
           ;; Header
           [:div.w-full.flex.justify-between.items-center
-           [:h1.ml-1.inline-block.text-2xl.text-white
+           [:h1.ml-1.inline-block.text-3xl.text-white
             (::alg/name current-alg)]
            (when-not (db/animating? @db)
              [:button.btn.text-sm.text-white.hover:bg-teal-400
@@ -112,28 +112,26 @@
             (::alg/description current-alg)]]
 
           ;; Buttons footer
-          [:div.text-center.h-full.mt-5
+          [:div.absolute.bottom-0.left-0.w-full.mb-8.text-center
            (if animating?
-             [:button.btn.btn--red.text-sm.mx-4
+             [:button.btn.btn--red.text-sm
               {:on-click #(db/cancel-animation! db)}
               [:i.mdi.mdi-stop-circle-outline.animate-pulsing]
               [:span.pl-3.font-bold.text-base "Stop"]]
-             [:div.mt-8
-              [:button.btn.text-lg.bg-white.text-teal-600.font-bold.hover:bg-teal-600.hover:text-white
-               {:on-click #(db/animate! db)}
-               (str "Visualize " (or (::alg/short-name current-alg)
-                                     (::alg/name current-alg)))]
-              [:div.text-center.mt-1
-               [:button.mx-4.text-white.underline.hover:no-underline
-                {:on-click #(db/reset-board! db)
-                 :class (when (or animating? (= (:db/board @db)
-                                                (:db/board (db/new-db))))
-                          "opacity-0")}
-                "reset"]]])]]
+             [:button.btn.text-lg.bg-white.text-teal-600.font-bold.hover:bg-teal-600.hover:text-white
+              {:on-click #(db/animate! db)}
+              (str "Visualize " (or (::alg/short-name current-alg)
+                                    (::alg/name current-alg)))])
+           [:div.text-center.mt-1
+            [:button.mx-4.text-white.underline.hover:no-underline
+             {:on-click #(db/reset-board! db)
+              :class (when (or animating? (= (:db/board @db)
+                                             (:db/board (db/new-db))))
+                       "opacity-0")}
+             "reset"]]]]
 
          ;; Checkmarks
-         [:div.mx-12.py-2.bg-teal-100.rounded-lg.relative.shadow-lg
-          {:style {:left 180 :top -40}}
+         [:div.relative.mx-12.-mt-4.py-2.bg-teal-100.rounded-lg.shadow-lg
           (for [check (checkmarks current-alg)]
             ^{:key (:check/title check)}
             [:div.my-3.px-4.text-base.text-center
@@ -204,7 +202,7 @@
                     (db/update! db dissoc :db/drag-target)
                     (when-let [end (get-in drag-handlers [drag-target :drag/end])]
                       (end db)))]
-    [:table {:on-mouse-leave end-drag!}
+    [:table.shadow-lg.border-2.border-blue-100 {:on-mouse-leave end-drag!}
      [:tbody
       (for [y (range height)]
         ^{:key y}

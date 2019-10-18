@@ -23,11 +23,11 @@
     ::shortest-path? true
     ::img-url (u/resource-path "img/a-star.svg")
     ::description
-    (str "A* (pronounced 'A Star') is considered the fastest path finding algorithm "
-         "and is commonly used for pathfinding in video games. It is a variation on "
-         "Dijkstra by using a heuristic to direct it's search towards the target. "
-         "The heuristic should be an estimate of the distance from any node to the "
-         "target. On this board we use the manhattan distance to direct the A* search.")}
+    (str "A* (pronounced 'A Star') is considered the fastest pathfinding algorithm "
+         "and is commonly used in video games. It is a variation on Dijkstra by "
+         "using a heuristic to direct it's search towards the target. The heuristic "
+         "should be an estimate of the distance from any node to the target. On "
+         "this board we use the manhattan distance to direct the A* search.")}
    {::name "Depth First Search"
     ::short-name "DFS"
     ::key ::depth-first

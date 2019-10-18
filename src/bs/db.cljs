@@ -35,20 +35,20 @@
 
 (defn new-db []
   (let [[src target] [[10 10] [30 15]]]
-    {:db/board (-> (board/make 56 20)
+    {:db/board (-> (board/make 45 30)
                    (board/set-source src)
                    (board/set-target target))
      :db/current-alg (first alg/ALL)}))
 
 (defn reset-board! [db]
-  (swap! db assoc :db/board (:db/board (new-db))))
+  (reset! db (assoc (new-db) :db/current-alg (:db/current-alg @db))))
 
 (defn hide-error! [db]
   (swap! db dissoc :db/error))
 
 (defn show-error! [db err]
   (swap! db assoc :db/error err)
-  (js/setTimeout #(hide-error! db) 5000))
+  (js/setTimeout #(hide-error! db) 3000))
 
 (defn update!
   "A middleware like way to update the app-db. If the algorithm or
