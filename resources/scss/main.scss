@@ -18,8 +18,12 @@ button:active, button:focus, select:active, select:focus {
 }
 
 .alert {
-  animation: appear 0.5s;
-  @apply bg-red-100 border-l-4 border-orange-500 text-red-700 p-4 fixed;
+  transition: opacity 0.5s ease-in-out;
+  @apply opacity-0 fixed bg-red-100 border-l-4 border-orange-500 text-lg text-red-700 font-bold;
+}
+
+.alert--is-open {
+  @apply opacity-100;
 }
 
 .btn {

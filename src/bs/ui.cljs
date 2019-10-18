@@ -35,7 +35,7 @@
       [:span.ml-2 {:class text-color} (:check/title check)]])])
 
 (defn- select-algorithm-modal [{:keys [on-close on-change current-alg]}]
-  [:div.modal.fixed.w-full.h-full.top-0.left-0.flex.items-center.justify-center
+  [:div.modal.z-50.fixed.w-full.h-full.top-0.left-0.flex.items-center.justify-center
 
    ;; Background click
    [:div.absolute.w-full.h-full.bg-gray-900.opacity-50
@@ -77,7 +77,7 @@
                      {:on-click #(on-change alg)}
                      "Select"]]])]]])]
 
-     [:button.float-right.px-4.bg-transparent.py-3.rounded-lg
+     [:button.float-right.px-4.bg-transparent.py-3.rounded-lg.text-gray-700.hover:text-gray-500
       {:on-click on-close}
       "Close"]
      [:div.clearfix]]]])
@@ -145,6 +145,12 @@
                                                     (db/update! db assoc :db/current-alg %))
                                     :current-alg current-alg}])]))))
 
+(def walls-cache
+  ^{:doc "For react performance, don't swap in every wall while
+          dragging, but rather natively animate them, store them in a
+          cache and flush them to the app db on mouse up."}
+  (atom '()))
+
 (defn board-table
   "The main animated attraction"
   [db]
@@ -154,32 +160,38 @@
         {::alg/keys [path visitation-order]} (when-not animating? alg-result)
         path? (let [s (set path)] #(contains? s %2))
         visited? (let [s (set visitation-order)] #(contains? s %2))
-        ;; For react performance, don't swap in every wall while
-        ;; dragging, but rather natively animate them, store them in a
-        ;; cache and flush them to the app db on mouse up.
-        new-walls-cache (transient [])
 
         start-drag! (fn [pos]
                       (let [type (cond (board/source? board pos) :drag/source
                                        (board/target? board pos) :drag/target
-                                       :else :drag/wall)]
+                                       (board/wall? board pos)   :drag/clear-walls
+                                       :else :drag/walls)]
                         (db/update! db assoc :db/dragging type)
-                        (when (= :drag/wall type)
-                          (db/update! db update :db/board board/make-wall pos))))
+                        (cond (= :drag/walls type)
+                              (db/update! db update :db/board board/make-wall pos)
+                              (= :drag/clear-walls type)
+                              (db/update! db update :db/board board/destroy-wall pos))))
         drag-to!     (fn [pos]
                        (when-let [f (case (:db/dragging st)
                                       :drag/source board/set-source
                                       :drag/target board/set-target
                                       nil)]
                          (db/update! db update :db/board f pos))
-                       (when (= :drag/wall (:db/dragging st))
+                       (when (= :drag/walls (:db/dragging st))
                          (u/add-class! (board/cell-id pos) "cell--wall-animated")
-                         (conj! new-walls-cache pos)))
+                         (swap! walls-cache conj pos))
+                       (when (= :drag/clear-walls (:db/dragging st))
+                         (u/remove-class! (board/cell-id pos) "cell--wall")
+                         (swap! walls-cache conj pos)))
         end-drag!     (fn []
                         (when (contains? st :db/dragging)
                           (db/update! db dissoc :db/dragging)
-                          (when-let [new-walls (seq (persistent! new-walls-cache))]
-                            (db/update! db update :db/board board/make-walls new-walls))))]
+                          (when-let [new-walls (seq @walls-cache)]
+                            (reset! walls-cache '())
+                            (if (= :drag/walls (:db/dragging st))
+                              (db/update! db update :db/board board/make-walls new-walls)
+                              (db/update! db update :db/board board/destroy-walls new-walls)))))]
+
     [:table {:on-mouse-leave end-drag!}
      [:tbody {:class (when animating? "cursor-not-allowed")}
       (for [y (range height)]
