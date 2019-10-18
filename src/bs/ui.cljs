@@ -43,7 +43,7 @@
    ;; Background click
    [:div.absolute.w-full.h-full.bg-gray-900.opacity-50
     {:on-click on-close}]
-   [:div.bg-white.md:max-w-6xl.mx-auto.rounded.shadow-lg.z-50.overflow-y-auto
+   [:div.bg-white.max-w-7xl.mx-auto.rounded.shadow-lg.z-50.overflow-y-auto
 
     ;; Header
     [:h1.text-3xl.py-4.px-10.text-indigo-900.shadow-inner.shadow-2xl.bg-gray-200 "Pick algorithm"]
@@ -55,7 +55,7 @@
 
         ;; Algorithm option
         ^{:key key}
-        [:a.p-4.pb-12.m-2.relative.cursor-default.text-gray-900
+        [:div.w-72.p-4.pb-12.m-2.relative.cursor-default.text-gray-900
          {:class (when selected? " bg-indigo-500 rounded")}
          [:img.float-right.pl-4.w-32.h-32 {:src img-url}]
          [:h1.text-xl.font-bold
@@ -69,16 +69,17 @@
 
          ;; Checkmarks and select(ed) button
          [:div.absolute.w-full.bottom-0.left-0
-          [:div.relative.bottom-0.left-0.flex.items-center.justify-between.mx-8.border-t-4.border-gray-200
+          [:div.relative.bottom-0.left-0.flex.items-center.justify-between.mx-3.border-t-4.border-gray-200
            (if selected?
              [:<>
-              [:div.mt-6.mb-6 [modal-checkmarks alg "text-white"]]
+              [:div.my-6 [modal-checkmarks alg "text-white"]]
               [:div.py-2.px-3.border.rounded.text-gray-200 [:span "SELECTED"]]]
              [:<>
-              [:div.mt-6.mb-6 [modal-checkmarks alg "text-gray-800"]]
-              [:div [:button.px-3.py-2.shadow-xl.shadow-inner.bg-indigo-600.tracking-wider.rounded.text-white.hover:bg-indigo-400
-                     {:on-click #(on-change alg)}
-                     "Select"]]])]]])]
+              [:div.my-6 [modal-checkmarks alg "text-gray-800"]]
+              [:div
+               [:button.px-3.py-2.shadow-xl.shadow-inner.bg-indigo-600.tracking-wider.rounded.text-white.hover:bg-indigo-400
+                {:on-click #(on-change alg)}
+                "Select"]]])]]])]
 
      [:button.float-right.px-4.bg-transparent.py-3.rounded-lg.text-gray-700.hover:text-gray-500
       {:on-click on-close}
