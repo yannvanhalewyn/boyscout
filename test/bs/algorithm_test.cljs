@@ -5,22 +5,21 @@
 
 (def expected-results
   {::sut/dijkstra
-   {:path [[0 1] [0 0] [1 0] [2 0] [3 0] [4 0] [5 0] [5 1] [5 2] [5 3]]
-    :visitation-order [[0 1] [0 0] [0 2] [1 0] [0 3] [2 0] [0 4] [1 3] [2 1]
-                       [3 0] [0 5] [2 3] [2 2] [4 0] [1 5] [3 3] [4 1] [5 0]
-                       [2 5] [4 2] [5 1] [3 5] [5 2] [4 5] [5 3]]}
+   {:path [[0 1] [0 0] [1 0] [2 0] [3 0] [4 0] [4 1] [4 2] [5 2] [5 3]]
+    :visitation-order [[0 1] [0 0] [0 2] [1 0] [0 3] [2 0] [1 3] [0 4] [3 0]
+                       [2 1] [2 3] [0 5] [4 0] [2 2] [3 3] [1 5] [5 0] [4 1]
+                       [2 5] [5 1] [4 2] [3 5] [5 2] [4 5] [5 3]]}
 
    ::sut/depth-first
-   {:path [[0 1] [0 2] [0 3] [1 3] [2 3] [2 2] [2 1] [2 0] [3 0] [4 0]
-           [5 0] [5 1] [5 2] [5 3]]
-    :visitation-order [[0 1] [0 2] [0 3] [1 3] [2 3] [3 3] [2 2] [2 1] [2 0]
-                       [3 0] [4 0] [5 0] [5 1] [5 2]]}
+   {:path [[0 1] [0 2] [0 3] [0 4] [0 5] [1 5] [2 5] [3 5] [4 5] [5 5] [5 4] [5 3]]
+    :visitation-order [[0 1] [0 2] [0 3] [0 4] [0 5] [1 5] [2 5] [3 5] [4 5] [5 5]
+                       [5 4] [4 4]]}
 
    ::sut/breadth-first
-   {:path [[0 1] [0 0] [1 0] [2 0] [3 0] [4 0] [5 0] [5 1] [5 2] [5 3]]
-    :visitation-order [[0 1] [0 0] [0 2] [1 0] [0 3] [2 0] [0 4] [1 3] [2 1]
-                       [3 0] [0 5] [2 3] [2 2] [4 0] [1 5] [3 3] [4 1] [5 0]
-                       [2 5] [4 2] [5 1] [3 5] [5 2] [4 5]]}})
+   {:path [[0 1] [0 0] [1 0] [2 0] [3 0] [4 0] [4 1] [4 2] [5 2] [5 3]]
+    :visitation-order [[0 1] [0 0] [0 2] [1 0] [0 3] [2 0] [1 3] [0 4]
+                       [3 0] [2 1] [2 3] [0 5] [4 0] [2 2] [3 3] [1 5]
+                       [5 0] [4 1] [2 5] [5 1] [4 2] [3 5] [5 2] [4 5]]}})
 
 (deftest algorithms-test
   ;; Given this board:
@@ -72,9 +71,11 @@
         (is (every? connected? (partition 2 1 path))))
 
       (testing (str alg " has the expected shortest path")
+        (.log js/console alg :path path)
         (is (= path (get-in expected-results [alg :path]))))
 
       (testing (str alg " has the expected visitation-order")
+        (.log js/console alg :visits visitation-order)
         (is (= visitation-order (get-in expected-results [alg :visitation-order]))))
 
       (testing (str alg " won't have an answer when target is off the grid")
