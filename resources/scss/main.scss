@@ -9,12 +9,12 @@ body {
   font-family: 'Raleway', sans-serif; /* YEAH */
 }
 
-.modal {
-  animation: appear 0.3s ease-out;
+.font-logo {
+  font-family: 'Amatic SC', cursive;
 }
 
-button:active, button:focus, select:active, select:focus {
-  outline: none;
+.modal {
+  animation: appear 0.3s ease-out;
 }
 
 .alert {
