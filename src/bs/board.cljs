@@ -81,14 +81,8 @@
      #(update-in %1 [:board/edges %2] disj pos)
      (assoc-in board [:board/edges pos] #{}) neighbors)))
 
-(defn make-walls [board positions]
-  (reduce make-wall board positions))
-
 (defn destroy-wall [board pos]
   (let [neighbors (remove (partial wall? board) (adjacent-coords board pos))]
     (reduce
      #(update-in %1 [:board/edges %2] conj pos)
      (assoc-in board [:board/edges pos] (set neighbors)) neighbors)))
-
-(defn destroy-walls [board positions]
-  (reduce destroy-wall board positions))

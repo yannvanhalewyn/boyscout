@@ -43,8 +43,9 @@
                [1 4] [2 4] [3 4]]
         source [0 1]
         target [5 3]
+        make-walls #(reduce board/make-wall %1 %2)
         board (-> (board/make 6 6)
-                  (board/make-walls walls)
+                  (make-walls walls)
                   (board/set-source source)
                   (board/set-target target))
         connected? (fn [[a b]]
@@ -82,5 +83,5 @@
         (is (nil? (sut/process alg (board/set-target board [10 10])))))
 
       (testing (str alg " won't have an answer when the target is unreachable")
-        (let [board (board/make-walls board [[3 0] [3 5]])]
+        (let [board (make-walls board [[3 0] [3 5]])]
           (is (nil? (sut/process alg board))))))))
