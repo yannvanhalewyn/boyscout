@@ -67,22 +67,24 @@ button:active, button:focus, select:active, select:focus {
 
 table {
   border-collapse:collapse;
-  cursor: pointer;
 }
 
 .cell {
+  cursor: crosshair;
   width: 23px;
   height: 23px;
   border: 1px solid rgb(175, 216, 248);
 }
 
 .cell--source {
+  cursor: grab;
   background: url(../img/triangletwo-right.svg) center no-repeat;
   background-size: contain;
   animation: grow 1s ease-out alternate;
 }
 
 .cell--target {
+  cursor: grab;
   background: url(../img/target.svg) center no-repeat;
   background-size: contain;
   animation: grow 1s ease-out alternate;
