@@ -47,6 +47,26 @@
         ["Start" :C :L :I :K :E "End" {:dir :none}]
         [:K :J :L {:dir :none}]))
 
+(def A_STAR
+  (list (make-node "Start" :target)
+        (make-node :A)
+        (make-node :B :path)
+        (make-node :C)
+        (make-node :D)
+        (make-node :E)
+        (make-node :F)
+        (make-node "End" :target)
+        (make-node :H :path)
+        (make-node :I)
+        (make-node :J)
+        (make-node :K)
+        (make-node :L)
+        ["Start" :A :D :F :H {:dir :none}]
+        ["Start" :B :H "End" {}]
+        [:A :B {:dir :none}]
+        ["Start" :C :L :I :K :E "End" {:dir :none}]
+        [:K :J :L {:dir :none}]))
+
 (def DFS
   (list (make-node "Start" :target)
         (make-node :A :visit)
@@ -77,6 +97,7 @@
 
 (doseq [[file data] [["resources/public/img/breadth-first.svg" BFS]
                      ["resources/public/img/depth-first.svg" DFS]
-                     ["resources/public/img/dijkstra.svg" DIJKSTRA]]]
+                     ["resources/public/img/dijkstra.svg" DIJKSTRA]
+                     ["resources/public/img/a-star.svg" A_STAR]]]
   (create-svg file data)
   (clojure.java.shell/sh "open" "-a" "Google Chrome" file))

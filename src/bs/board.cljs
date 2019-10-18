@@ -47,7 +47,7 @@
   (keys (:board/edges board)))
 
 (defn neighbor-coords [board pos]
-  (get-in board [:board/edges pos]))
+  (sort (get-in board [:board/edges pos])))
 
 ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
 ;; Queries

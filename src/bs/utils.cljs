@@ -26,9 +26,24 @@
 (defn map-vals
   "Returns a new map where all the keys have been updated by f"
   [coll f]
-  (into {} (for [[k v] coll] [k (f v)])))
+  (into {} (for [[k v] coll] [k (f v k)])))
 
 (defn remove-keys
   "Returns a map without the keys that won't pass the predicate"
   [coll pred]
   (into {} (remove (fn [[k _]] (pred k)) coll)))
+
+(def abs (.-abs js/Math))
+(def sqrt (.-sqrt js/Math))
+(def square #(* % %))
+
+(defn pythagorian-distance
+  "The cartesian distance between points [x y] and [x' y']"
+  [[x y] [x' y']]
+  (sqrt (+ (square (- x' x)) (square (- y' y))) ))
+
+(defn manhattan-distance
+  "The distance if you we're to walk horizontally or vertically on a
+  grid from [x y] to [x' y']"
+  [[x y] [x' y']]
+  (+ (abs (- x' x)) (abs (- y' y))))
