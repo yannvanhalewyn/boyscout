@@ -34,13 +34,6 @@
   (into {} (remove (fn [[k _]] (pred k)) coll)))
 
 (def abs (.-abs js/Math))
-(def sqrt (.-sqrt js/Math))
-(def square #(* % %))
-
-(defn pythagorian-distance
-  "The cartesian distance between points [x y] and [x' y']"
-  [[x y] [x' y']]
-  (sqrt (+ (square (- x' x)) (square (- y' y))) ))
 
 (defn manhattan-distance
   "The distance if you we're to walk horizontally or vertically on a

@@ -9,6 +9,10 @@ body {
   font-family: 'Raleway', sans-serif; /* YEAH */
 }
 
+button, button:focus, button:active {
+  outline: none;
+}
+
 .font-logo {
   font-family: 'Amatic SC', cursive;
 }
@@ -18,12 +22,9 @@ body {
 }
 
 .alert {
-  transition: opacity 0.5s ease-in-out;
-  @apply opacity-0 fixed bg-red-100 border-l-4 border-orange-500 text-lg text-red-700 font-bold;
-}
-
-.alert--is-open {
-  @apply opacity-100;
+  transition: opacity 0.3s ease-in-out;
+  animation: appear 0.3s ease-in-out;
+  @apply fixed bg-red-100 border-l-4 border-orange-500 text-lg text-red-700 font-bold;
 }
 
 .btn {

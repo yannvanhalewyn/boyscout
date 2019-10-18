@@ -44,10 +44,11 @@
   (reset! db (assoc (new-db) :db/current-alg (:db/current-alg @db))))
 
 (defn hide-error! [db]
-  (swap! db dissoc :db/error))
+  (swap! db assoc :db/error [(first (:db/error @db)) :error/closing])
+  (js/setTimeout #(swap! db dissoc :db/error) 300))
 
 (defn show-error! [db err]
-  (swap! db assoc :db/error err)
+  (swap! db assoc :db/error [err :error/open])
   (js/setTimeout #(hide-error! db) 3000))
 
 (defn update!

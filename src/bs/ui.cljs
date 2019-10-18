@@ -46,7 +46,7 @@
    [:div.bg-white.max-w-7xl.mx-auto.rounded.shadow-lg.z-50.overflow-y-auto
 
     ;; Header
-    [:h1.text-3xl.py-4.px-10.text-indigo-900.shadow-inner.shadow-2xl.bg-gray-200 "Pick algorithm"]
+    [:h1.text-3xl.py-4.px-10.text-indigo-900.shadow.bg-gray-200 "Pick algorithm"]
 
     [:div.py-4.text-left.px-6
      [:div.flex

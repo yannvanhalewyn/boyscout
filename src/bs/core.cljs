@@ -8,6 +8,12 @@
 
 (defn root [db]
   [:<>
+   (when-let [[error status] (:db/error @db)]
+     [:div.alert.w-full.px-4.py-6.text-center
+      {:class (when (= status :error/closing) "opacity-0")}
+      [:button.mdi.mdi-close.text-lg.float-right.hover:text-red-900
+       {:on-click #(db/hide-error! db)}]
+      [:p error]])
    [:div.px-24.py-2.bg-gray-100.shadow
     [:a.pt2.btn.float-right.align-middle.text-gray-800.hover:bg-gray-200
      {:style {:line-height "34px"}
@@ -19,11 +25,6 @@
      [:i.mdi.mdi-tent.text-4xl]
      [:h1.ml-3.inline-block.font-logo.font-bold.text-4xl.tracking-widest "Boyscout"]]
     [:span.ml-10.text-gray-600.align-middle "A pathfinding and maze generation visualizer"]]
-   (let [error (:db/error @db)]
-     [:div.alert.w-full.px-4.py-6.text-center {:class (when error "alert--is-open")}
-      [:button.mdi.mdi-close.text-lg.float-right.hover:text-red-900
-       {:on-click #(db/hide-error! db)}]
-      [:p error]])
    [:div.flex.mt-8.flex-wrap.max-w-7xl.m-auto
     [:div.px-8 {:class "xl:w-1/3"}
      [ui/sidebar db]]
