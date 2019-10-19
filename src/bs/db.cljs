@@ -77,8 +77,8 @@
   "Generates a maze, clears the board's walls and kicks-off a maze animation"
   [db]
   (let [{:db/keys [board] :as db*} @db
-        {:board/keys [width height]} board
-        walls (maze/with-walls width height)
+        {:board/keys [width height source target]} board
+        walls (remove #{source target} (maze/with-walls width height))
         steps (for [w walls]
                 (bs.animation/make-step
                  (board/cell-id w) "cell--wall-animated" ANIMATION_SPEED))
