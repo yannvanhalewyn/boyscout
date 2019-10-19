@@ -23,14 +23,14 @@
                (merge parents (zipmap neighbors (repeat cur)) ))))))
 
 (defn depth-first
-  "Traverses a graph via depth first. Accepts a visit-fn and a
-  visit-fn to get the neighboring nodes given a certain node."
+  "Traverses a graph from source to target via depth first. Accepts a
+  visit-fn where (visit-fn n) should return the neighboring node of n."
   [start end visit-fn]
   (*-first start end visit-fn first rest))
 
 (defn breadth-first
-  "Traverses a graph via depth first. Accepts a visit-fn and a
-  visit-fn to get the neighboring nodes given a certain node."
+  "Traverses a graph from source to target via breadth first. Accepts a
+  visit-fn where (visit-fn n) should return the neighboring node of n."
   [start end visit-fn]
   (*-first start end visit-fn peek pop))
 

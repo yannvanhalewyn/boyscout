@@ -24,7 +24,12 @@
     [:span.text-blue-700.align-middle
      [:i.mdi.mdi-tent.text-4xl]
      [:h1.ml-3.inline-block.font-logo.font-bold.text-4xl.tracking-widest "Boyscout"]]
-    [:span.ml-10.text-gray-600.align-middle "A pathfinding and maze generation visualizer"]]
+    [:span.ml-10.text-gray-600.align-middle
+     "A pathfinding and "
+     [:button.cursor-pointer.underline.text-blue-600.hover:text-blue-300
+      {:on-click #(db/generate-maze! db)}
+      "maze"]
+     " generation visualizer"]]
    [:div.flex.mt-8.flex-wrap.max-w-7xl.m-auto
     [:div.px-8 {:class "xl:w-1/3"}
      [ui/sidebar db]]

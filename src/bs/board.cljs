@@ -86,3 +86,6 @@
     (reduce
      #(update-in %1 [:board/edges %2] conj pos)
      (assoc-in board [:board/edges pos] (set neighbors)) neighbors)))
+
+(defn clear-walls [{:board/keys [width height] :as board}]
+  (assoc board :board/edges (:board/edges (make width height))))

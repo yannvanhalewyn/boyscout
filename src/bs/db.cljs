@@ -1,7 +1,8 @@
 (ns bs.db
   (:require [bs.algorithm :as alg]
             [bs.animation :as animation]
-            [bs.board :as board]))
+            [bs.board :as board]
+            [bs.maze :as maze]))
 
 (def ANIMATION_SPEED 8)
 
@@ -22,13 +23,12 @@
   [{:db/keys [current-alg board]}]
   (alg/process (::alg/key current-alg) board))
 
-(defn- animate!* [db {::alg/keys [path visitation-order] :as alg-result}]
-  (let [mk-step #(animation/make-step (board/cell-id %1) %2 (* %3 ANIMATION_SPEED))]
-    (animation/start!
-     (concat (map #(mk-step % "cell--visited-animated" 1) visitation-order)
-             (map #(mk-step % "cell--path-animated" 4) path))
-     #(swap! db assoc :db/animation %
-             :db/alg-result alg-result))))
+(defn- run-animation!
+  ([db steps db-after]
+   (run-animation! db steps db-after db-after))
+  ([db steps db-before db-after]
+   (let [done-fn #(reset! db (assoc db-after :db/animation %))]
+     (reset! db (assoc db-before :db/animation (bs.animation/start! steps done-fn))))))
 
 ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
 ;; Public
@@ -61,15 +61,33 @@
       (reset! db (assoc new-db :db/alg-result (process-alg new-db)))
       (reset! db new-db))))
 
-(defn animate!
+(defn animate-alg!
   "Calculates the algorithm result of the current board and selected
   algorithm, and kicks-off an animation process."
   [db]
-  (let [{::alg/keys [path] :as result} (process-alg @db)]
+  (let [{::alg/keys [path visitation-order] :as result} (process-alg @db)
+        mk-step #(animation/make-step (board/cell-id %1) %2 (* %3 ANIMATION_SPEED))]
     (if (empty? path)
       (show-error! db "Target is unreachable")
-      (swap! db assoc :db/animation
-             (animate!* db result)))))
+      (run-animation!
+       db
+       (concat (map #(mk-step % "cell--visited-animated" 1) visitation-order)
+               (map #(mk-step % "cell--path-animated" 4) path))
+       (assoc @db :db/alg-result result)))))
+
+(defn generate-maze!
+  "Generates a maze, clears the board's walls and kicks-off a maze animation"
+  [db]
+  (let [{:db/keys [board] :as db*} @db
+        {:board/keys [width height]} board
+        walls (maze/recursive-division width height)
+        steps (for [w walls]
+                (bs.animation/make-step (board/cell-id w) "cell--wall-animated" 5))
+        empty-board (board/clear-walls board)
+        db-before (assoc db* :db/board empty-board)
+        db-after (assoc (dissoc db* :db/alg-result)
+                   :db/board (reduce board/make-wall empty-board walls))]
+    (run-animation! db steps db-before db-after)))
 
 (defn animating? [db]
   (animation/running? (:db/animation db)))

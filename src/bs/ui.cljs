@@ -128,7 +128,7 @@
               [:i.mdi.mdi-stop-circle-outline.animate-pulsing]
               [:span.pl-3.font-bold.text-base "Stop"]]
              [:button.btn.text-lg.bg-white.text-teal-600.font-bold.hover:bg-teal-600.hover:text-white
-              {:on-click #(db/animate! db)}
+              {:on-click #(db/animate-alg! db)}
               (str "Visualize " (or (::alg/short-name current-alg)
                                     (::alg/name current-alg)))])
            [:div.text-center.mt-1
