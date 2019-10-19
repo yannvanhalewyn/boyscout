@@ -24,9 +24,10 @@
   (alg/process (::alg/key current-alg) board))
 
 (defn- run-animation!
-  [db steps db-before db-after]
+  [db steps db-before db-after & [done-timeout]]
   (let [done-fn #(reset! db (assoc db-after :db/animation %))]
-    (reset! db (assoc db-before :db/animation (bs.animation/start! steps done-fn)))))
+    (reset! db (assoc db-before :db/animation
+                      (bs.animation/start! steps done-fn done-timeout)))))
 
 ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
 ;; Public
@@ -71,14 +72,14 @@
                        visitation-order)
                   (map #(mk-step % "cell--path-animated" 4 "cell--source")
                        path))
-       @db (assoc @db :db/alg-result result)))))
+       @db (assoc @db :db/alg-result result) 1400))))
 
 (defn generate-maze!
   "Generates a maze, clears the board's walls and kicks-off a maze animation"
   [db]
   (let [{:db/keys [board] :as db*} @db
         {:board/keys [width height source target]} board
-        walls (remove #{source target} (maze/with-walls width height))
+        walls (remove #{source target} (maze/recursive-division width height))
         steps (for [w walls]
                 (bs.animation/make-step
                  (board/cell-id w) "cell--wall-animated" ANIMATION_SPEED))
