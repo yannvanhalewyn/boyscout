@@ -1,5 +1,5 @@
 SRC_FILES  := $(shell find src -type f)
-CSS_FILES  := $(shell find resources/scss -type f)
+CSS_FILES  := $(shell find resources/css -type f)
 TARGET_JS  := build/js/main.js
 TARGET_CSS := build/css/application.css
 TARGET_DEV_CSS := resources/public/css/application.css
@@ -10,7 +10,7 @@ repl:
 	shadow-cljs watch app test
 
 css-watch: $(TARGET_DEV_CSS)
-	fsevent_watch -F ./resources/scss | xargs -I{} make $(TARGET_DEV_CSS)
+	fsevent_watch -F $(CSS_FILES) | xargs -I{} make $(TARGET_DEV_CSS)
 
 $(TARGET_JS): $(SRC_FILES)
 	@echo "---- Building cljs"

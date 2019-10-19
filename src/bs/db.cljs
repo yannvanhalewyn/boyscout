@@ -24,21 +24,18 @@
   (alg/process (::alg/key current-alg) board))
 
 (defn- run-animation!
-  ([db steps db-after]
-   (run-animation! db steps db-after db-after))
-  ([db steps db-before db-after]
-   (let [done-fn #(reset! db (assoc db-after :db/animation %))]
-     (reset! db (assoc db-before :db/animation (bs.animation/start! steps done-fn))))))
+  [db steps db-before db-after]
+  (let [done-fn #(reset! db (assoc db-after :db/animation %))]
+    (reset! db (assoc db-before :db/animation (bs.animation/start! steps done-fn)))))
 
 ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
 ;; Public
 
 (defn new-db []
-  (let [[src target] [[10 10] [30 15]]]
-    {:db/board (-> (board/make 45 30)
-                   (board/set-source src)
-                   (board/set-target target))
-     :db/current-alg (first alg/ALL)}))
+  {:db/board (-> (board/make 45 30)
+                 (board/set-source [10 10])
+                 (board/set-target [30 15]))
+   :db/current-alg (first alg/ALL)})
 
 (defn reset-board! [db]
   (reset! db (assoc (new-db) :db/current-alg (:db/current-alg @db))))
@@ -66,14 +63,15 @@
   algorithm, and kicks-off an animation process."
   [db]
   (let [{::alg/keys [path visitation-order] :as result} (process-alg @db)
-        mk-step #(animation/make-step (board/cell-id %1) %2 (* %3 ANIMATION_SPEED))]
+        mk-step #(animation/make-step (board/cell-id %1) %2 (* %3 ANIMATION_SPEED) %4)]
     (if (empty? path)
       (show-error! db "Target is unreachable")
       (run-animation!
-       db
-       (concat (map #(mk-step % "cell--visited-animated" 1) visitation-order)
-               (map #(mk-step % "cell--path-animated" 4) path))
-       (assoc @db :db/alg-result result)))))
+       db (concat (map #(mk-step % "cell--visited-animated" 1 "cell--path")
+                       visitation-order)
+                  (map #(mk-step % "cell--path-animated" 4 "cell--source")
+                       path))
+       @db (assoc @db :db/alg-result result)))))
 
 (defn generate-maze!
   "Generates a maze, clears the board's walls and kicks-off a maze animation"

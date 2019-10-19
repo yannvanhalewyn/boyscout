@@ -131,6 +131,11 @@ table {
   background-color: rgb(255, 254, 106);
 }
 
+/* Override visitation animation on current cell */
+.cell--path.cell--visited-animated {
+  animation: none;
+}
+
 .cell--wall-animated {
   border: none;
   animation: blackhole 0.3s ease-out alternate forwards;
