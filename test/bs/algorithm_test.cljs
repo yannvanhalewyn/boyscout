@@ -12,8 +12,9 @@
 
    ::sut/a*
    {:path [[0 1] [0 0] [1 0] [2 0] [3 0] [4 0] [5 0] [5 1] [5 2] [5 3]]
-    :visitation-order [[0 1] [0 2] [0 3] [1 3] [2 3] [3 3] [2 2] [0 4] [2 1]
-                       [0 0] [1 0] [2 0] [3 0] [4 0] [5 0] [5 1] [5 2] [5 3]]}
+
+    :visitation-order [[0 1] [0 2] [0 3] [1 3] [2 3] [3 3] [2 2] [0 4] [0 0]
+                       [1 0] [2 0] [3 0] [4 0] [5 0] [5 1] [5 2] [5 3]]}
 
    ::sut/depth-first
    {:path [[0 1] [0 2] [0 3] [0 4] [0 5] [1 5] [2 5] [3 5] [4 5] [5 5] [5 4] [5 3]]
@@ -77,8 +78,6 @@
         (is (every? connected? (partition 2 1 path))))
 
       (testing (str alg " has the expected shortest path")
-        (.log js/console path)
-        (.log js/console visitation-order)
         (is (= path (get-in expected-results [alg :path]))))
 
       (testing (str alg " has the expected visitation-order")
