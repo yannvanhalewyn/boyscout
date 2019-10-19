@@ -7,6 +7,9 @@
 (defn- in-board? [[w h] [x y]]
   (and (<= 0 x (dec w)) (<= 0 y (dec h))))
 
+(defn- plus [[x y] [x' y']]
+  [(+ x x') (+ y y')])
+
 (declare recursive-division)
 
 (defn- wall-candidate? [board-size wall? before-wall after-wall]
@@ -15,39 +18,39 @@
        (or (not (in-board? board-size after-wall))
            (wall? after-wall))))
 
-(defn- divide-horizontally [walls board-size [w h] [offset-x offset-y]]
+(defn- divide-horizontally [walls board-size [width height] offset]
   (let [wall? (set walls)
         candidates (filter #(and (not (zero? %))
-                                 (wall-candidate?
-                                  board-size wall?
-                                  [(dec offset-x) (+ offset-y %)]
-                                  [(+ w offset-x) (+ offset-y %)]))
-                           (range (dec h)))
-        y (rand-nth candidates)
-        door-x (rand-int w)
-        new-walls (when y
-                    (for [x (range w) :when (not= door-x x)]
-                      [(+ offset-x x) (+ offset-y y)]))]
+                                 (wall-candidate? board-size wall?
+                                                  (plus [-1 %] offset)
+                                                  (plus [width %] offset)))
+                           (range (dec height)))
+        south-of (rand-nth candidates)
+        door-x (rand-int width)
+        new-walls (when south-of
+                    (for [x (range width) :when (not= door-x x)]
+                      (plus [x south-of] offset)))]
     (as-> (concat walls new-walls) $
-      (recursive-division board-size [w y] [offset-x offset-y] $)
-      (recursive-division board-size [w (- h y 1)] [offset-x (+ offset-y y 1)] $))))
+      (recursive-division board-size [width south-of] offset $)
+      (recursive-division board-size [width (- height south-of 1)]
+                          (plus offset [0 (inc south-of)]) $))))
 
-(defn- divide-vertically [walls board-size [w h] [offset-x offset-y]]
+(defn- divide-vertically [walls board-size [width height] offset]
   (let [wall? (set walls)
         candidates (filter #(and (not (zero? %))
-                                 (wall-candidate?
-                                  board-size wall?
-                                  [(+ offset-x %) (dec offset-y)]
-                                  [(+ offset-x %) (+ h offset-y)]))
-                           (range (dec w)))
-        x (rand-nth candidates)
-        door-y (rand-int h)
-        new-walls (when x
-                    (for [y (range h) :when (not= door-y y)]
-                      [(+ offset-x x) (+ offset-y y)]))]
+                                 (wall-candidate? board-size wall?
+                                                  (plus [% -1] offset)
+                                                  (plus [% height] offset)))
+                           (range (dec width)))
+        east-of (rand-nth candidates)
+        door-y (rand-int height)
+        new-walls (when east-of
+                    (for [y (range height) :when (not= door-y y)]
+                      (plus [east-of y] offset)))]
     (as-> (concat walls new-walls) $
-      (recursive-division board-size [x h] [offset-x offset-y] $)
-      (recursive-division board-size [(- w x 1) h] [(+ offset-x x 1) offset-y] $))))
+      (recursive-division board-size [east-of height] offset $)
+      (recursive-division board-size [(- width east-of 1) height]
+                          (plus offset [(inc east-of) 0]) $))))
 
 (defn recursive-division
   "Will return a list of walls (in generation order) that would
@@ -73,7 +76,7 @@
                       (for [y (range (dec height))] [(dec width) (inc y)])
                       (for [x (reverse (range (dec width)))] [x (dec height)])
                       (for [y (reverse (range (- height 2)))] [0 (inc y)]))]
-    (recursive-division [width height] [(- width 2) (- height 2)] [1 1] walls)))
+    (recursive-division [width height] (plus [width height] [-2 -2]) [1 1] walls)))
 
 (comment
   (defn- ->ascii [w h walls]
