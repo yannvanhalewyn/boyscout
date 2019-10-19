@@ -80,9 +80,10 @@
   [db]
   (let [{:db/keys [board] :as db*} @db
         {:board/keys [width height]} board
-        walls (maze/recursive-division width height)
+        walls (maze/with-walls width height)
         steps (for [w walls]
-                (bs.animation/make-step (board/cell-id w) "cell--wall-animated" 5))
+                (bs.animation/make-step
+                 (board/cell-id w) "cell--wall-animated" ANIMATION_SPEED))
         empty-board (board/clear-walls board)
         db-before (assoc db* :db/board empty-board)
         db-after (assoc (dissoc db* :db/alg-result)

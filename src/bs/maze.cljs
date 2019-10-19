@@ -55,8 +55,6 @@
   width and height"
   ([width height] (recursive-division [width height] [width height] [0 0] []))
   ([board-size [width height :as size] offset walls]
-   (when (< 1000 (count walls))
-     (throw "Infinite loop"))
    (if (and (>= width 2) (>= height 2))
      (cond (< width height)
            (divide-horizontally walls board-size size offset)
@@ -66,6 +64,16 @@
                    (divide-horizontally walls board-size size offset)
                    (divide-vertically walls board-size size offset)))
      walls)))
+
+(defn with-walls
+  "First draws walls (clockwise for animation) around the board and
+  then proceeds to recursively divide the inner maze."
+  [width height]
+  (let [walls (concat (for [x (range width)] [x 0])
+                      (for [y (range (dec height))] [(dec width) (inc y)])
+                      (for [x (reverse (range (dec width)))] [x (dec height)])
+                      (for [y (reverse (range (- height 2)))] [0 (inc y)]))]
+    (recursive-division [width height] [(- width 2) (- height 2)] [1 1] walls)))
 
 (comment
   (defn- ->ascii [w h walls]
