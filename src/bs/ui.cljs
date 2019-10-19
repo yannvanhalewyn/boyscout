@@ -73,13 +73,12 @@
            (if selected?
              [:<>
               [:div.my-6 [modal-checkmarks alg "text-white"]]
-              [:div.py-2.px-3.border.rounded.text-gray-200 [:span "SELECTED"]]]
+              [:div.py-1.px-2.text-sm.border.rounded.text-gray-200 [:span "SELECTED"]]]
              [:<>
               [:div.my-6 [modal-checkmarks alg "text-gray-800"]]
-              [:div
-               [:button.px-3.py-2.shadow-xl.shadow-inner.bg-indigo-600.tracking-wider.rounded.text-white.hover:bg-indigo-400
-                {:on-click #(on-change alg)}
-                "Select"]]])]]])]
+              [:button.px-3.py-2.shadow-xl.shadow-inner.bg-indigo-600.tracking-wider.rounded.text-white.hover:bg-indigo-400
+               {:on-click #(on-change alg)}
+               "Select"]])]]])]
 
      [:button.float-right.px-4.bg-transparent.py-3.rounded-lg.text-gray-700.hover:text-gray-500
       {:on-click on-close}
