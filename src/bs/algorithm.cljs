@@ -10,13 +10,12 @@
     (str "https://github.com/yannvanhalewyn/boyscout/blob/master/src/"
          file "#L" line)))
 
-
 (def ALL
   [{::name "Dijkstra"
     ::key ::dijkstra
     ::weighted? true
     ::shortest-path? true
-    ::wiki-url "https://en.wikipedia.org/wiki/A*_search_algorithm"
+    ::wiki-url "https://en.wikipedia.org/wiki/Dijkstra%27s_algorithm"
     ::img-url (u/resource-path "img/dijkstra.svg")
     ::source-url (source-url #'dijkstra/dijkstra)
     ::description
@@ -28,6 +27,7 @@
     ::key ::a*
     ::weighted? true
     ::shortest-path? true
+    ::wiki-url "https://en.wikipedia.org/wiki/A*_search_algorithm"
     ::img-url (u/resource-path "img/a-star.svg")
     ::source-url (source-url #'a-star/a-star)
     ::description
@@ -39,6 +39,7 @@
    {::name "Depth First Search"
     ::short-name "DFS"
     ::key ::depth-first
+    ::wiki-url "https://en.wikipedia.org/wiki/Depth-first_search"
     ::img-url (u/resource-path "img/depth-first.svg")
     ::source-url (source-url #'depth-first/depth-first)
     ::description
@@ -50,6 +51,7 @@
     ::short-name "BFS"
     ::key ::breadth-first
     ::shortest-path? true
+    ::wiki-url "https://en.wikipedia.org/wiki/Breadth-first_search"
     ::img-url (u/resource-path "img/breadth-first.svg")
     ::source-url (source-url #'depth-first/breadth-first)
     ::description

@@ -87,8 +87,9 @@
      [:div.clearfix]]]])
 
 (defn sidebar
-  "A little side panel on the left with the algorithm name description
-  and some facts. Can also open a modal and change the selected algorithm"
+  "The side panel on the left with the algorithm name description,
+  facts and animation state. and some facts. Can also open a modal and
+  change the selected algorithm"
   []
   (let [modal? (r/atom false)]
     (fn [db]
@@ -118,7 +119,10 @@
           [:div
            [:img.float-left.p-2.pl-0.mt-4.w-24.h-24 {:src (::alg/img-url current-alg)}]
            [:p.mt-4.font-serif.text-justify.text-teal-200.leading-relaxed
-            (::alg/description current-alg)]]
+            (::alg/description current-alg) " "
+            [:a.cursor-pointer.underline.text-teal-300.hover:text-teal-100
+             {:href (::alg/wiki-url current-alg) :target "_blank"}
+             "Learn more"]]]
 
           ;; Buttons footer
           [:div.absolute.bottom-0.left-0.w-full.mb-8.text-center
@@ -225,7 +229,7 @@
                                  board/wall? "cell--wall"
                                  path? "cell--path"
                                  visited? "cell--visited"}
-                          :when (f board [x y])] v)
+                          :when (f board pos)] v)
              :style (when animating? {:cursor "wait"})
              :on-mouse-down (when-not animating? #(start-drag! pos))
              :on-mouse-enter #(drag-to! pos)
