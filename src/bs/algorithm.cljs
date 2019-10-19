@@ -88,7 +88,7 @@
   (process*
    a-star/a-star board
    #(zipmap (board/neighbor-coords board %2) (repeat 1))
-   #(* 1.05 (u/manhattan-distance % target))))
+   #(u/manhattan-distance % target)))
 
 (defmethod process ::depth-first [_ board]
   (process* depth-first/depth-first board))

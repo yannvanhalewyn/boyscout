@@ -20,7 +20,8 @@
   n as vals, and (heuristic-fn n) should return an estimated distance
   between n and the target."
   [source target visit-fn heuristic-fn]
-  (loop [distances (priority-map-keyfn #(+ (:cost %) (:heuristic %))
+  (loop [distances (priority-map-keyfn (fn [{:keys [cost heuristic]}]
+                                         [(+ cost heuristic) heuristic])
                                        source {:cost 0 :heuristic 0})
          result {}]
     ;; Start on the nearest unvisited node (priority-map)
