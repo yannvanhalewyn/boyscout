@@ -5,6 +5,12 @@
             [bs.algorithms.depth-first :as depth-first]
             [bs.utils :as u]))
 
+(defn- source-url [symbol]
+  (let [{:keys [file line]} (meta symbol)]
+    (str "https://github.com/yannvanhalewyn/boyscout/blob/master/src/"
+         file "#L" line)))
+
+
 (def ALL
   [{::name "Dijkstra"
     ::key ::dijkstra
@@ -12,6 +18,7 @@
     ::shortest-path? true
     ::wiki-url "https://en.wikipedia.org/wiki/A*_search_algorithm"
     ::img-url (u/resource-path "img/dijkstra.svg")
+    ::source-url (source-url #'dijkstra/dijkstra)
     ::description
     (str "Dijkstra is the father of pathfinding algorithms. It was conceived by "
          "computer scientist Edsger W. Dijkstra published in 1956 and is one of the "
@@ -22,6 +29,7 @@
     ::weighted? true
     ::shortest-path? true
     ::img-url (u/resource-path "img/a-star.svg")
+    ::source-url (source-url #'a-star/a-star)
     ::description
     (str "A* (pronounced 'A Star') is considered the fastest pathfinding algorithm "
          "and is commonly used in video games. It is a variation on Dijkstra by "
@@ -32,6 +40,7 @@
     ::short-name "DFS"
     ::key ::depth-first
     ::img-url (u/resource-path "img/depth-first.svg")
+    ::source-url (source-url #'depth-first/depth-first)
     ::description
     (str "Depth First Search is one of the best known " "algorithms for searching "
          "tree or graph data " "structures. The algorithm will explore as far " "as "
@@ -42,6 +51,7 @@
     ::key ::breadth-first
     ::shortest-path? true
     ::img-url (u/resource-path "img/breadth-first.svg")
+    ::source-url (source-url #'depth-first/breadth-first)
     ::description
     (str "Breadth First Search is a very similar  algorithm " "to it's brother, "
          "Depth, differencing only in how " "the unvisited nodes are prioritised. "

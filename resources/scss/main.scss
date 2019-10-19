@@ -13,6 +13,14 @@ button, button:focus, button:active {
   outline: none;
 }
 
+.link {
+  @apply cursor-pointer underline text-blue-600
+}
+
+.link:hover {
+  @apply text-blue-300
+}
+
 .font-logo {
   font-family: 'Amatic SC', cursive;
 }

@@ -99,8 +99,17 @@
 
           ;; Header
           [:div.w-full.flex.justify-between.items-center
-           [:h1.ml-1.inline-block.text-3xl.text-white
-            (::alg/name current-alg)]
+           [:div.ml-1
+            [:h1.text-3xl.text-white
+             (::alg/name current-alg)]
+            [:span
+             [:a.cursor-pointer.underline.text-teal-300.hover:text-teal-100
+
+              {:href (::alg/source-url current-alg) :target "_blank"}
+              "View code"]
+             [:img.inline.ml-2.opacity-75 {:src (u/resource-path "img/github-mark-32.png")
+                                           :width 16
+                                           :height 16}]]]
            (when-not (db/animating? @db)
              [:button.btn.text-sm.text-white.hover:bg-teal-400
               {:on-click #(reset! modal? true)} "Change"])]
