@@ -20,9 +20,10 @@
   n as vals, and (heuristic-fn n) should return an estimated distance
   between n and the target."
   [source target visit-fn heuristic-fn]
-  (loop [distances (priority-map-keyfn (fn [{:keys [cost heuristic]}]
-                                         [(+ cost heuristic) heuristic])
+  (loop [distances (priority-map-keyfn (fn [{:keys [cost heuristic visitation-idx]}]
+                                         [(+ cost heuristic) heuristic visitation-idx])
                                        source {:cost 0 :heuristic 0})
+         visitation-idx 0 ;; Prioritise earlier visited nodes for nicer animations :)
          result {}]
     ;; Start on the nearest unvisited node (priority-map)
     (if-let [[cur current-distance] (peek distances)]
@@ -36,9 +37,11 @@
                                    (u/remove-keys result)
                                    (u/map-vals (fn [cost node]
                                                  {:cost (+ (:cost current-distance) cost)
+                                                  :visitation-idx visitation-idx
                                                   :heuristic (heuristic-fn node)
                                                   :parent cur})))]
             ;; Merge in the new costs of those neighbors, but only if it's cheaper
             (recur (merge-with (partial min-key :cost) (pop distances) neighbor-costs)
+                   (inc visitation-idx)
                    result))))
       result)))
