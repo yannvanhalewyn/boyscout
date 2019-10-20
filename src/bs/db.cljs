@@ -13,6 +13,8 @@
   [#:tool {:key :tool/wall   :name "Walls"  :icon-class "cell--wall"}
    #:tool {:key :tool/forest :name "Forest" :icon-class "cell--forest"}])
 
+(def DEFAULT_SPEED (second SPEEDS))
+
 (defn- recalculate-alg?
   "Wether or not the algorithm output should be recalculated. This
   should happen when there has been an animation and if either the
@@ -58,7 +60,7 @@
 (defn new-db []
   {:db/board (new-board)
    :db/current-alg (first alg/ALL)
-   :db/animation-speed (second SPEEDS)
+   :db/animation-speed DEFAULT_SPEED
    :db/tool (:tool/key (first TOOLS))})
 
 (defn reset-board! [db]
@@ -96,12 +98,12 @@
 (defn generate-maze!
   "Generates a maze, clears the board's walls and kicks-off a maze animation"
   [db]
-  (let [{:db/keys [board animation-speed] :as db*} @db
+  (let [{:db/keys [board] :as db*} @db
         {:board/keys [width height source target]} board
         walls (remove #{source target} (maze/recursive-division width height))
         steps (for [w walls]
                 (bs.animation/make-step (board/cell-id w) "cell--wall-animated"
-                                        (:speed/visit animation-speed)))
+                                        (:speed/visit DEFAULT_SPEED)))
         empty-board (board/reset-edges board)
         db-before (assoc db* :db/board empty-board)
         db-after (assoc (dissoc db* :db/alg-result)
