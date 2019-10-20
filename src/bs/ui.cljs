@@ -6,6 +6,75 @@
             [reagent.core :as r]))
 
 ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
+;; Animated Board
+
+(def walls-cache
+  ^{:doc "For react performance, don't swap in every wall while
+          dragging, but rather natively animate them, store them in a
+          cache and flush them to the app db on mouse up."}
+  (atom '()))
+
+(def drag-handlers
+  (let [wall-handler
+        (fn [board-fn [cell-fn cell-class]]
+          {:drag/start #(db/update! %1 update :db/board board-fn %2)
+           :drag/move (fn [_ pos]
+                        (cell-fn (board/cell-id pos) cell-class)
+                        (swap! walls-cache conj pos))
+           :drag/end (fn [db]
+                       (when-let [walls (seq @walls-cache)]
+                         (reset! walls-cache '())
+                         (db/update!
+                          db update :db/board #(reduce board-fn % walls))))})]
+    {:drag/source {:drag/move #(db/update! %1 update :db/board board/set-source %2)}
+     :drag/target {:drag/move #(db/update! %1 update :db/board board/set-target %2)}
+     :drag/make-wall (wall-handler board/make-wall [u/add-class! "cell--wall-animated"])
+     :drag/clear-wall (wall-handler board/destroy-wall [u/remove-class! "cell--wall"])}))
+
+(defn- drag-type [{:db/keys [board]} pos]
+  (cond (board/source? board pos) :drag/source
+        (board/target? board pos) :drag/target
+        (board/wall? board pos)   :drag/clear-wall
+        :else :drag/make-wall))
+
+(defn board-table
+  "The main animated attraction"
+  [db]
+  (let [{:db/keys [board alg-result drag-target] :as state} @db
+        {:board/keys [width height] :as board} board
+        animating? (db/animating? state)
+        {::alg/keys [path visitation-order]} (when-not animating? alg-result)
+        path? (let [s (set path)] #(contains? s %2))
+        visited? (let [s (set visitation-order)] #(contains? s %2))
+        drag-handler (get drag-handlers drag-target)
+        start-drag! (fn [pos]
+                      (let [type (drag-type state pos)]
+                        (db/update! db assoc :db/drag-target (drag-type state pos))
+                        ((get-in drag-handlers [type :drag/start] u/no-op) db pos)))
+        end-drag!   (fn []
+                      (db/update! db dissoc :db/drag-target)
+                      ((:drag/end drag-handler u/no-op) db))]
+    [:table.shadow-lg.border-2.border-blue-100 {:on-mouse-leave end-drag!}
+     [:tbody
+      (for [y (range height)]
+        ^{:key y}
+        [:tr
+         (for [x (range width) :let [pos [x y]]]
+           ^{:key x}
+           [:td.cell
+            {:id (board/cell-id pos)
+             :class (for [[f v] {board/source? "cell--source"
+                                 board/target? "cell--target"
+                                 board/wall? "cell--wall"
+                                 path? "cell--path"
+                                 visited? "cell--visited"}
+                          :when (f board pos)] v)
+             :style (when animating? {:cursor "wait"})
+             :on-mouse-down (when-not animating? #(start-drag! pos))
+             :on-mouse-enter #((:drag/move drag-handler u/no-op) db pos)
+             :on-mouse-up end-drag!}])])]]))
+
+;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
 ;; Sidebar and modal
 
 (defn- checkmarks [{::alg/keys [weighted? shortest-path?]}]
@@ -159,78 +228,3 @@
                                     :on-change #(do (reset! modal? false)
                                                     (db/update! db assoc :db/current-alg %))
                                     :current-alg current-alg}])]))))
-
-;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
-;; Animated Board
-
-(def walls-cache
-  ^{:doc "For react performance, don't swap in every wall while
-          dragging, but rather natively animate them, store them in a
-          cache and flush them to the app db on mouse up."}
-  (atom '()))
-
-(def drag-handlers
-  (let [wall-handler
-        (fn [board-fn [cell-fn cell-class]]
-          {:drag/start #(db/update! %1 update :db/board board-fn %2)
-           :drag/move (fn [_ pos]
-                        (cell-fn (board/cell-id pos) cell-class)
-                        (swap! walls-cache conj pos))
-           :drag/end (fn [db]
-                       (when-let [walls (seq @walls-cache)]
-                         (reset! walls-cache '())
-                         (db/update!
-                          db update :db/board #(reduce board-fn % walls))))})]
-    {:drag/source {:drag/move #(db/update! %1 update :db/board board/set-source %2)}
-     :drag/target {:drag/move #(db/update! %1 update :db/board board/set-target %2)}
-     :drag/make-wall (wall-handler board/make-wall [u/add-class! "cell--wall-animated"])
-     :drag/clear-wall (wall-handler board/destroy-wall [u/remove-class! "cell--wall"])}))
-
-(defn- drag-type [{:db/keys [board]} pos]
-  (cond (board/source? board pos) :drag/source
-        (board/target? board pos) :drag/target
-        (board/wall? board pos)   :drag/clear-wall
-        :else :drag/make-wall))
-
-(defn board-table
-  "The main animated attraction"
-  [db]
-  (let [{:db/keys [board alg-result drag-target] :as state} @db
-        {:board/keys [width height] :as board} board
-        animating? (db/animating? state)
-        {::alg/keys [path visitation-order]} (when-not animating? alg-result)
-        path? (let [s (set path)] #(contains? s %2))
-        visited? (let [s (set visitation-order)] #(contains? s %2))
-        start-drag! (fn [pos]
-                      (let [type (drag-type @db pos)]
-                        (db/update! db assoc :db/drag-target type)
-                        (when-let [start-drag (get-in drag-handlers [type :drag/start])]
-                          (start-drag db pos))))
-
-        drag-to! (fn [pos]
-                   (when-let [move (get-in drag-handlers [drag-target :drag/move])]
-                     (move db pos)))
-
-        end-drag! (fn []
-                    (db/update! db dissoc :db/drag-target)
-                    (when-let [end (get-in drag-handlers [drag-target :drag/end])]
-                      (end db)))]
-    [:table.shadow-lg.border-2.border-blue-100 {:on-mouse-leave end-drag!}
-     [:tbody
-      (for [y (range height)]
-        ^{:key y}
-        [:tr
-         (for [x (range width) :let [pos [x y]]]
-           ^{:key x}
-           [:td.cell
-            {:id (board/cell-id pos)
-             :class (for [[f v] {board/source? "cell--source"
-                                 board/target? "cell--target"
-                                 board/wall? "cell--wall"
-                                 path? "cell--path"
-                                 visited? "cell--visited"}
-                          :when (f board pos)] v)
-             :style (when animating? {:cursor "wait"})
-             :on-mouse-down (when-not animating? #(start-drag! pos))
-             :on-mouse-enter #(drag-to! pos)
-             :on-mouse-up end-drag!}])])]]))
