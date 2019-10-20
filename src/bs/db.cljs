@@ -41,7 +41,7 @@
 (defn- animation-steps [{::alg/keys [visitation-order path]} animation-speed]
   (concat
    (map #(animation/make-step (board/cell-id %) "cell--visited-animated"
-                              (:speed/visit animation-speed) "cell--path")
+                              (:speed/visit animation-speed) "cell--animation-current")
         visitation-order)
    (map #(animation/make-step (board/cell-id %) "cell--path-animated"
                               (:speed/path animation-speed) "cell--source")

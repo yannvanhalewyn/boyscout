@@ -64,15 +64,12 @@ button, button:focus, button:active {
 /* =============================================================================
    Board cells and animation */
 
-table {
-  border-collapse:collapse;
-}
-
 .cell {
   cursor: crosshair;
-  width: 23px;
-  height: 23px;
-  border: 1px solid rgb(175, 216, 248);
+  width: 22px;
+  height: 22px;
+  border-width: 1px;
+  border-color: rgb(175, 216, 248);
 }
 
 .cell--wall-animated {
@@ -87,7 +84,7 @@ table {
 }
 
 .cell--forest {
-  border: none;
+  border-width: 0;
   background-image: url('../img/tree.svg');
   background-position: center;
   background-repeat: no-repeat;
@@ -118,6 +115,10 @@ table {
 
 .cell--path {
   background-color: #ffff31;
+}
+
+.cell--animation-current {
+  @apply border-4 border-pink-600;
 }
 
 /* Override visitation animation on current cell */
