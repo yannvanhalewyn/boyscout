@@ -35,7 +35,7 @@
 
 
 (def DEFAULT_WEIGHT 1)
-(def FOREST_WEIGHT 3)
+(def FOREST_WEIGHT 2)
 
 (defn- in-board?
   "Predicate for wether a position is on the board"
