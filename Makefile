@@ -1,8 +1,13 @@
+BUILD_DIR  := build
+IMG_DIR    := resources/public/img
+
 SRC_FILES  := $(shell find src -type f)
 CSS_FILES  := $(shell find resources/css -type f)
-TARGET_JS  := build/js/main.js
-TARGET_CSS := build/css/application.css
+IMG_FILES  := $(shell find $(IMG_DIR) -type f)
+TARGET_JS  := $(BUILD_DIR)/js/main.js
+TARGET_CSS := $(BUILD_DIR)/css/application.css
 TARGET_CSS_DEV := resources/public/css/application.css
+TARGET_IMG_FILES := $(patsubst $(IMG_DIR)/%, $(BUILD_DIR)/img/%, $(IMG_FILES))
 
 default: build
 
@@ -23,15 +28,14 @@ $(TARGET_CSS): $(CSS_FILES) $(SRC_FILES)
 $(TARGET_CSS_DEV): $(CSS_FILES)
 	npx tailwind build $^ -o $@
 
-index.html: resources/public/index.html
-	cat $^ | sed 's|css/application.css|build/css/application.css|' | sed 's|js/app|build/js|' | sed 's|favicon.ico|./resources/public/favicon.ico|' > $@
-
-cp-img:
-	@echo "---- Copying resources"
+$(TARGET_IMG_FILES): $(BUILD_DIR)/img/%: $(IMG_DIR)/%
 	@[ -d build/img ] || mkdir build/img
-	cp -r resources/public/img/* build/img
+	cp $< $@
 
-build: $(TARGET_JS) $(TARGET_CSS) index.html cp-img
+index.html: resources/public/index.html
+	cat $^ | sed 's|css/application.css|$(BUILD_DIR)/css/application.css|' | sed 's|js/app|$(BUILD_DIR)/js|' | sed 's|favicon.ico|./resources/public/favicon.ico|' > $@
+
+build: $(TARGET_JS) $(TARGET_CSS) $(TARGET_IMG_FILES) index.html
 
 stash:
 	@git diff --quiet || git stash save "Stash before release"
