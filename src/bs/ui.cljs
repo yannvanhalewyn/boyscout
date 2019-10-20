@@ -14,28 +14,35 @@
           cache and flush them to the app db on mouse up."}
   (atom '()))
 
+(defn draw-handler
+  "Makes a new handler for drawing (forests and walls)"
+  [board-fn cell-fn]
+  {:drag/start #(db/update! %1 update :db/board board-fn %2)
+   :drag/move (fn [board pos]
+                (cell-fn board pos)
+                (swap! cells-cache conj pos))
+   :drag/end (fn [db]
+               (when-let [cells (seq @cells-cache)]
+                 (reset! cells-cache '())
+                 (db/update! db update :db/board #(reduce board-fn % cells))))})
+
 (def drag-handlers
-  (let [draw-handler
-        (fn [board-fn [cell-fn cell-class]]
-          {:drag/start #(do
-                          (println "OK" cell-fn board-fn cell-class)
-                          (db/update! %1 update :db/board board-fn %2))
-           :drag/move (fn [_ pos]
-                        (cell-fn (board/cell-id pos) cell-class)
-                        (swap! cells-cache conj pos))
-           :drag/end (fn [db]
-                       (when-let [cells (seq @cells-cache)]
-                         (reset! cells-cache '())
-                         (db/update! db update :db/board
-                                     #(reduce board-fn % cells))))})]
+  ^{:doc "A drag handler has three functions: start, move and end. For
+          each of the drag types there is a drag handler that
+          implements one or more of these."}
+  (let [add-class #(fn [_ pos] (u/add-class! (board/cell-id pos) %))
+        remove-class #(fn [_ pos] (u/remove-class! (board/cell-id pos) %))]
     {:drag/source {:drag/move #(db/update! %1 update :db/board board/set-source %2)}
      :drag/target {:drag/move #(db/update! %1 update :db/board board/set-target %2)}
-     :drag/make-wall (draw-handler board/make-wall
-                                   [u/add-class! "cell--wall-animated"])
-     :drag/clear-wall (draw-handler board/destroy-wall
-                                    [u/remove-class! "cell--wall"])
-     :drag/make-forest (draw-handler board/make-forest [u/add-class! "cell--forest-animated"])
-     :drag/clear-forest (draw-handler board/unilever [u/remove-class! "cell--forest"])}))
+     :drag/make-wall (draw-handler board/make-wall (add-class "cell--wall-animated"))
+     :drag/clear-wall (draw-handler board/destroy-wall (remove-class "cell--wall"))
+     :drag/clear-forest (draw-handler board/unilever (remove-class "cell--forest"))
+     :drag/make-forest (draw-handler
+                        board/make-forest
+                        #(let [f (add-class "cell--forest-animated")
+                               {:board/keys [source target] :as b} (:db/board @%1)]
+                           (when-not (or (board/wall? b %2) (= source %2) (= target %2))
+                             (f %1 %2))))}))
 
 (defn- drag-type [{:db/keys [board] :as db} pos]
   (cond (board/source? board pos) :drag/source

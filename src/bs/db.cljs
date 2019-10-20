@@ -52,8 +52,8 @@
   (let [[width height] (u/window-dimensions)
         [w h] (u/vmin [45 30] (map #(int (/ % 23)) [width height]))]
     (-> (board/make w h)
-        (board/set-source (u/v* [w h] [(/ 1 3) (/ 1 3)]))
-        (board/set-target (u/v* [w h] [(/ 2 3) (/ 2 3)])))))
+        (board/set-source (map int (u/v* [w h] [(/ 1 3) (/ 1 3)])))
+        (board/set-target (map int (u/v* [w h] [(/ 2 3) (/ 2 3)]))))))
 
 (defn new-db []
   {:db/board (new-board)

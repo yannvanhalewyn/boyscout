@@ -31,7 +31,8 @@
                  [1 0] {[0 0] 1}
                  [1 1] {}
                  [1 2] {[2 0] 1}}}
-  ```")
+  ```"
+  (:require [bs.utils :as u]))
 
 
 (def DEFAULT_WEIGHT 1)
@@ -116,8 +117,7 @@
   (assoc-in board [:board/edges from to] weight))
 
 (defn make-forest [board pos]
-  (reduce #(set-weight %1 pos %2 FOREST_WEIGHT)
-          board (neighbor-coords board pos)))
+  (update-in board [:board/edges pos] u/map-vals (constantly FOREST_WEIGHT)))
 
 (defn destroy-wall [board pos]
   (let [weight #(if (forest? board %) FOREST_WEIGHT DEFAULT_WEIGHT)]
