@@ -114,6 +114,10 @@ table {
   animation: flash 1.5s ease-out alternate forwards;
 }
 
+.cell--forest.cell--visited-animated {
+  animation: flashGreen 1.5s ease-out alternate forwards;
+}
+
 .cell--visited {
   background-color: rgba(0, 190, 218, 0.75);
 }
@@ -142,6 +146,17 @@ table {
   background-color: rgb(12, 53, 71);
 }
 
+.cell--forest-animated {
+  border: none;
+  animation: greenhole 0.3s ease-out alternate forwards;
+  animation-play-state: running;
+}
+
+.cell--forest {
+  border: none;
+  @apply bg-green-200
+}
+
 @keyframes flash {
   0% {
     transform: scale(.3);
@@ -161,6 +176,27 @@ table {
   100% {
     transform: scale(1.0);
     background-color: rgba(0, 190, 218, 0.75);
+  }
+}
+
+@keyframes flashGreen {
+  0% {
+    transform: scale(0.8);
+    @apply bg-green-200;
+  }
+
+  50% {
+    background-color: rgba(17, 104, 217, 0.75);
+  }
+
+  75% {
+    transform: scale(1.2);
+    background-color: rgba(0, 217, 159, 0.75)
+  }
+
+  100% {
+    transform: scale(1.0);
+    @apply bg-green-500;
   }
 }
 
@@ -209,6 +245,23 @@ table {
   100% {
     transform: scale(1.0);
     background-color: rgb(12, 53, 71);
+  }
+}
+
+@keyframes greenhole {
+  0% {
+    transform: scale(.3);
+    @apply bg-green-100
+  }
+
+  50% {
+    transform: scale(1.2);
+    @apply bg-green-200
+  }
+
+  100% {
+    transform: scale(1.0);
+    @apply bg-green-200;
   }
 }
 

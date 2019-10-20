@@ -8,33 +8,41 @@
 ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
 ;; Animated Board
 
-(def walls-cache
+(def cells-cache
   ^{:doc "For react performance, don't swap in every wall while
           dragging, but rather natively animate them, store them in a
           cache and flush them to the app db on mouse up."}
   (atom '()))
 
 (def drag-handlers
-  (let [wall-handler
+  (let [draw-handler
         (fn [board-fn [cell-fn cell-class]]
-          {:drag/start #(db/update! %1 update :db/board board-fn %2)
+          {:drag/start #(do
+                          (println "OK" cell-fn board-fn cell-class)
+                          (db/update! %1 update :db/board board-fn %2))
            :drag/move (fn [_ pos]
                         (cell-fn (board/cell-id pos) cell-class)
-                        (swap! walls-cache conj pos))
+                        (swap! cells-cache conj pos))
            :drag/end (fn [db]
-                       (when-let [walls (seq @walls-cache)]
-                         (reset! walls-cache '())
-                         (db/update!
-                          db update :db/board #(reduce board-fn % walls))))})]
+                       (when-let [cells (seq @cells-cache)]
+                         (reset! cells-cache '())
+                         (db/update! db update :db/board
+                                     #(reduce board-fn % cells))))})]
     {:drag/source {:drag/move #(db/update! %1 update :db/board board/set-source %2)}
      :drag/target {:drag/move #(db/update! %1 update :db/board board/set-target %2)}
-     :drag/make-wall (wall-handler board/make-wall [u/add-class! "cell--wall-animated"])
-     :drag/clear-wall (wall-handler board/destroy-wall [u/remove-class! "cell--wall"])}))
+     :drag/make-wall (draw-handler board/make-wall
+                                   [u/add-class! "cell--wall-animated"])
+     :drag/clear-wall (draw-handler board/destroy-wall
+                                    [u/remove-class! "cell--wall"])
+     :drag/make-forest (draw-handler board/make-forest [u/add-class! "cell--forest-animated"])
+     :drag/clear-forest (draw-handler board/unilever [u/remove-class! "cell--forest"])}))
 
-(defn- drag-type [{:db/keys [board]} pos]
+(defn- drag-type [{:db/keys [board tool]} pos]
   (cond (board/source? board pos) :drag/source
         (board/target? board pos) :drag/target
         (board/wall? board pos)   :drag/clear-wall
+        (board/forest? board pos) :drag/clear-forest
+        (= tool :tool/forest)     :drag/make-forest
         :else :drag/make-wall))
 
 (defn board-table
@@ -66,6 +74,7 @@
              :class (for [[f v] {board/source? "cell--source"
                                  board/target? "cell--target"
                                  board/wall? "cell--wall"
+                                 board/forest? "cell--forest"
                                  path? "cell--path"
                                  visited? "cell--visited"}
                           :when (f board pos)] v)

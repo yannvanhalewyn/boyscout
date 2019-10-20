@@ -80,15 +80,11 @@
        ::visitation-order (persistent! visitation-order)})))
 
 (defmethod process ::dijkstra [_ board]
-  (process*
-   dijkstra/dijkstra board
-   #(zipmap (board/neighbor-coords board %2) (repeat 1))))
+  (process* dijkstra/dijkstra board board/neighbors))
 
 (defmethod process ::a* [_ {:board/keys [target] :as board}]
-  (process*
-   a-star/a-star board
-   #(zipmap (board/neighbor-coords board %2) (repeat 1))
-   #(u/manhattan-distance % target)))
+  (process* a-star/a-star board board/neighbors
+            #(u/manhattan-distance % target)))
 
 (defmethod process ::depth-first [_ board]
   (process* depth-first/depth-first board))
