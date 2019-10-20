@@ -1,9 +1,13 @@
 {:source-paths ["src" "test"]
- :dependencies [[binaryage/devtools "0.9.10"]
-                [org.clojure/core.async "0.4.490"]
+ :dependencies [[org.clojure/core.async "0.4.490"]
                 [tailrecursion/cljs-priority-map "1.2.1"]
                 [reagent "0.9.0-rc1"]
-                [dorothy "0.0.7"]]
+
+                ;; Devtools
+                [binaryage/devtools "0.9.10"]
+                [dorothy "0.0.7"]
+                [cider/cider-nrepl "0.22.4"]
+                [refactor-nrepl "2.4.0"]]
  :builds {:app {:target :browser
                 :output-dir "resources/public/js/app"
                 :devtools {:http-port 8080
