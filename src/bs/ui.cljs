@@ -87,27 +87,28 @@
 ;; Toolbar
 
 (defn toolbar [db]
-  (let [current-tool (:db/tool @db :tool/wall)]
+  (let [{:db/keys [tool animation-speed]} @db]
     [:div.flex.items-center.justify-between.mb-4.pb-3.border-b-2.border-gray-200
      [:div
-      (for [[title class tool] [["Walls" "cell--wall" :tool/wall]
-                                ["Forest" "cell--forest" :tool/forest]]]
-        ^{:key title}
+      (for [{:tool/keys [key icon-class name]} db/TOOLS]
+        ^{:key key}
         [:button.px-4.py-1.tracking-wider
-         {:class (if (= current-tool tool)
+         {:class (if (= tool key)
                    "text-gray-700 font-bold border rounded-lg cursor-default"
                    "text-gray-600 hover:text-gray-700 cursor-pointer")
-          :on-click #(swap! db assoc :db/tool tool)}
-         [:i.inline-block.cell.w-4.h-4.rounded.align-middle.cursor-inherit {:class class}]
-         [:span.ml-3 title]])]
+          :on-click #(swap! db assoc :db/tool key)}
+         [:i.inline-block.cell.w-4.h-4.rounded.align-middle.cursor-inherit
+          {:class icon-class}]
+         [:span.ml-3 name]])]
      [:div
-      (for [[speed selected?] [["Slow" false] ["Fast" true]]]
-        ^{:key speed}
+      (for [{:speed/keys [name] :as speed} db/SPEEDS]
+        ^{:key name}
         [:button.mr-3.px-1.text-gray-500
-         {:class (if selected?
+         {:class (if (= speed animation-speed)
                    "text-blue-600 font-bold border-b-2 border-blue-600 cursor-default"
-                   "text-gray-500 hover:text-gray-600")}
-         speed])]]))
+                   "text-gray-500 hover:text-gray-600")
+          :on-click #(swap! db assoc :db/animation-speed speed)}
+         name])]]))
 
 ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
 ;; Sidebar and modal
