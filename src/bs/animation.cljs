@@ -6,11 +6,11 @@
 
 (defn make-step
   "Makes a step that can be used for an animation"
-  [id class timeout & [visit-class]]
+  [id class duration & [visit-class]]
   {::id id
    ::class class
    ::visit-class visit-class
-   ::timeout timeout})
+   ::duration duration})
 
 (defn start!
   "Takes a list of animation steps and animates them in order. Will
@@ -22,11 +22,11 @@
   probably be equal to the duration of the last animation step."
   [steps done-fn & [done-timeout]]
   (let [close-ch (a/chan)]
-    (go-loop [[{::keys [id class timeout visit-class]} & others] steps]
+    (go-loop [[{::keys [id class duration visit-class]} & others] steps]
       (when visit-class (u/add-class! id visit-class))
       (u/add-class! id class)
       (if (seq others)
-        (let [[v _] (a/alts! [(a/timeout timeout) close-ch])]
+        (let [[v _] (a/alts! [(a/timeout duration) close-ch])]
           (when visit-class (u/remove-class! id visit-class))
           (if (= v :animation/stop!)
             (doseq [{::keys [id class]}
