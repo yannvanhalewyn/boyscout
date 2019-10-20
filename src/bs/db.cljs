@@ -34,8 +34,8 @@
 
 (defn new-db []
   {:db/board (-> (board/make 45 30)
-                 (board/set-source [12 18])
-                 (board/set-target [19 27]))
+                 (board/set-source [15 10])
+                 (board/set-target [30 20]))
    :db/current-alg (first alg/ALL)})
 
 (defn reset-board! [db]

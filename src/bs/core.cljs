@@ -36,6 +36,7 @@
     [:div.px-8 {:class "xl:w-1/3"}
      [ui/sidebar db]]
     [:div.px-3.mt-8.lg:mt-0 {:class "xl:w-2/3"}
+     [ui/toolbar db]
      [ui/board-table db]]]])
 
 (defn ^:dev/after-load render! []

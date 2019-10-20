@@ -73,6 +73,10 @@ button, button:focus, button:active {
   height: 28rem;
 }
 
+.h-110 {
+  height: 34rem;
+}
+
 /* ============================================================================
    Board cells and animation */
 
@@ -82,8 +86,8 @@ table {
 
 .cell {
   cursor: crosshair;
-  width: 22px;
-  height: 22px;
+  width: 23px;
+  height: 23px;
   border: 1px solid rgb(175, 216, 248);
 }
 

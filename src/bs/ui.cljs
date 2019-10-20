@@ -75,6 +75,32 @@
              :on-mouse-up end-drag!}])])]]))
 
 ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
+;; Toolbar
+
+(defn toolbar [db]
+  (let [current-tool (:db/tool @db :tool/wall)]
+    [:div.flex.items-center.justify-between.mb-4.pb-3.border-b-2.border-gray-200
+     [:div
+      (for [[title class tool] [["Walls" "cell--wall" :tool/wall]
+                                ["Forest" "bg-green-200" :tool/forest]]]
+        ^{:key title}
+        [:button.px-4.py-1.tracking-wider
+         {:class (if (= current-tool tool)
+                   "text-gray-700 font-bold border rounded-lg cursor-default"
+                   "text-gray-600 hover:text-gray-700")
+          :on-click #(swap! db assoc :db/tool tool)}
+         [:i.inline-block.cell.w-4.h-4.rounded.align-middle {:class class}]
+         [:span.ml-3 title]])]
+     [:div
+      (for [[speed selected?] [["Slow" false] ["Fast" true]]]
+        ^{:key speed}
+        [:button.mr-3.px-1.text-gray-500
+         {:class (if selected?
+                   "text-blue-600 font-bold border-b-2 border-blue-600 cursor-default"
+                   "text-gray-500 hover:text-gray-600")}
+         speed])]]))
+
+;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
 ;; Sidebar and modal
 
 (defn- checkmarks [{::alg/keys [weighted? shortest-path?]}]
@@ -164,7 +190,7 @@
       (let [{:db/keys [current-alg]} @db
             animating? (db/animating? @db)]
         [:div
-         [:div.relative.py-6.px-6.h-96.bg-teal-500.rounded
+         [:div.relative.py-6.px-6.h-110.bg-teal-500.rounded
 
           ;; Header
           [:div.w-full.flex.justify-between.items-center
@@ -186,7 +212,7 @@
           ;; Body
           [:div
            [:img.float-left.p-2.pl-0.mt-4.w-24.h-24 {:src (::alg/img-url current-alg)}]
-           [:p.mt-4.font-serif.text-justify.text-teal-200.leading-relaxed
+           [:p.mt-4.font-serif.text-justify.text-teal-200.leading-loose
             (::alg/description current-alg) " "
             [:a.cursor-pointer.underline.text-teal-300.hover:text-teal-100
              {:href (::alg/wiki-url current-alg) :target "_blank"}
