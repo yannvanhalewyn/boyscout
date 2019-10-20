@@ -75,46 +75,6 @@ table {
   border: 1px solid rgb(175, 216, 248);
 }
 
-.cell--source {
-  cursor: grab;
-  background: url(../img/triangletwo-right.svg) center no-repeat;
-  background-size: contain;
-  animation: grow 1s ease-out alternate;
-}
-
-.cell--target {
-  cursor: grab;
-  background: url(../img/target.svg) center no-repeat;
-  background-size: contain;
-  animation: grow 1s ease-out alternate;
-}
-
-.cell--target {
-  background: url(../img/target.svg) center no-repeat;
-  background-size: contain;
-}
-
-.cell--visited-animated {
-  animation: flash 1.5s ease-out alternate forwards;
-}
-
-.cell--visited {
-  background-color: rgba(0, 190, 218, 0.75);
-}
-
-.cell--path-animated {
-  animation: glow 1.3s linear alternate forwards;
-}
-
-.cell--path {
-  background-color: #ffff31;
-}
-
-/* Override visitation animation on current cell */
-.cell--path.cell--visited-animated {
-  animation: none;
-}
-
 .cell--wall-animated {
   border: none;
   animation: blackhole 0.3s ease-out alternate forwards;
@@ -142,6 +102,41 @@ table {
   @apply cell--forest;
   animation: grow 0.3s ease-out alternate forwards;
   animation-play-state: running;
+}
+
+.cell--visited-animated {
+  animation: flash 1.5s ease-out alternate forwards;
+}
+
+.cell--visited {
+  background-color: rgba(0, 190, 218, 0.75);
+}
+
+.cell--path-animated {
+  animation: glow 1.3s linear alternate forwards;
+}
+
+.cell--path {
+  background-color: #ffff31;
+}
+
+/* Override visitation animation on current cell */
+.cell--path.cell--visited-animated {
+  animation: none;
+}
+
+.cell--source {
+  cursor: grab;
+  background: url(../img/triangletwo-right.svg) center no-repeat;
+  background-size: contain;
+  animation: grow 1s ease-out alternate;
+}
+
+.cell--target {
+  cursor: grab;
+  background: url(../img/target.svg) center no-repeat;
+  background-size: contain;
+  animation: grow 1s ease-out alternate;
 }
 
 @keyframes flash {

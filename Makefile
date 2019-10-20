@@ -14,8 +14,24 @@ default: build
 repl:
 	shadow-cljs watch app test
 
-css-watch: $(TARGET_DEV_CSS)
+css: $(TARGET_CSS_DEV)
+
+css-watch: $(TARGET_CSS_DEV)
 	fsevent_watch -F $(CSS_FILES) | xargs -I{} make $(TARGET_CSS_DEV)
+
+build: $(TARGET_JS) $(TARGET_CSS) $(TARGET_IMG_FILES) index.html
+
+release: stash build
+	git checkout master
+	@echo "Creating new gh-pages branch"
+	git branch -D gh-pages || echo ''
+	git checkout -b gh-pages
+	@echo "Creating release commit"
+	git add build index.html
+	git commit -m "Release"
+	@echo "Pushing release to GitHub"
+	git push -f origin gh-pages
+	git checkout master
 
 $(TARGET_JS): $(SRC_FILES)
 	@echo "---- Building cljs"
@@ -35,19 +51,5 @@ $(TARGET_IMG_FILES): $(BUILD_DIR)/img/%: $(IMG_DIR)/%
 index.html: resources/public/index.html
 	cat $^ | sed 's|css/application.css|$(BUILD_DIR)/css/application.css|' | sed 's|js/app|$(BUILD_DIR)/js|' | sed 's|favicon.ico|./resources/public/favicon.ico|' > $@
 
-build: $(TARGET_JS) $(TARGET_CSS) $(TARGET_IMG_FILES) index.html
-
 stash:
 	@git diff --quiet || git stash save "Stash before release"
-
-release: stash build
-	git checkout master
-	@echo "Creating new gh-pages branch"
-	git branch -D gh-pages || echo ''
-	git checkout -b gh-pages
-	@echo "Creating release commit"
-	git add build index.html
-	git commit -m "Release"
-	@echo "Pushing release to GitHub"
-	git push -f origin gh-pages
-	git checkout master
