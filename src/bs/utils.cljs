@@ -48,7 +48,17 @@
   [[x y] [x' y']]
   (+ (abs (- x' x)) (abs (- y' y))))
 
+(defn v+
+  "A 2d vector addition"
+  [[x y] [x' y']]
+  [(+ x x') (+ y y')])
+
 (defn v*
   "A 2d vector multiplication"
   [[x y] [x' y']]
   [(* x x') (* y y')])
+
+(defn vmin
+  "Like min but for 2d vectors"
+  [[x y] [x' y']]
+  [(min x x') (min y y')])

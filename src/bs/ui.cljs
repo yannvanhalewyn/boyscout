@@ -37,18 +37,19 @@
      :drag/make-forest (draw-handler board/make-forest [u/add-class! "cell--forest-animated"])
      :drag/clear-forest (draw-handler board/unilever [u/remove-class! "cell--forest"])}))
 
-(defn- drag-type [{:db/keys [board tool]} pos]
+(defn- drag-type [{:db/keys [board] :as db} pos]
   (cond (board/source? board pos) :drag/source
         (board/target? board pos) :drag/target
         (board/wall? board pos)   :drag/clear-wall
         (board/forest? board pos) :drag/clear-forest
-        (= tool :tool/forest)     :drag/make-forest
-        :else :drag/make-wall))
+        :else (if (= (db/current-tool db) :tool/forest)
+                :drag/make-forest
+                :drag/make-wall)))
 
 (defn board-table
   "The main animated attraction"
   [db]
-  (let [{:db/keys [board alg-result drag-target] :as state} @db
+  (let [{:db/keys [board alg-result drag-target current-alg] :as state} @db
         {:board/keys [width height] :as board} board
         animating? (db/animating? state)
         {::alg/keys [path visitation-order]} (when-not animating? alg-result)
@@ -74,7 +75,7 @@
              :class (for [[f v] {board/source? "cell--source"
                                  board/target? "cell--target"
                                  board/wall? "cell--wall"
-                                 board/forest? "cell--forest"
+                                 board/forest? (when (::alg/weighted? current-alg) "cell--forest")
                                  path? "cell--path"
                                  visited? "cell--visited"}
                           :when (f board pos)] v)
@@ -87,19 +88,25 @@
 ;; Toolbar
 
 (defn toolbar [db]
-  (let [{:db/keys [tool animation-speed]} @db]
+  (let [{:db/keys [animation-speed current-alg] :as db*} @db]
     [:div.flex.items-center.justify-between.mb-4.pb-3.border-b-2.border-gray-200
      [:div
-      (for [{:tool/keys [key icon-class name]} db/TOOLS]
+      (for [{:tool/keys [key icon-class name]} db/TOOLS
+            :let [disabled? (and (= key :tool/forest) (not (::alg/weighted? current-alg)))]]
         ^{:key key}
         [:button.px-4.py-1.tracking-wider
-         {:class (if (= tool key)
-                   "text-gray-700 font-bold border rounded-lg cursor-default"
-                   "text-gray-600 hover:text-gray-700 cursor-pointer")
+         {:class
+          (str (str (if (= (db/current-tool db*) key)
+                      "text-gray-700 font-bold border rounded-lg cursor-default"
+                      "text-gray-600 hover:text-gray-700 cursor-pointer")
+                    (when disabled? " cursor-not-allowed")))
           :on-click #(swap! db assoc :db/tool key)}
+
          [:i.inline-block.cell.w-4.h-4.rounded.align-middle.cursor-inherit
-          {:class icon-class}]
-         [:span.ml-3 name]])]
+          {:class (str icon-class (when disabled? " opacity-50"))}]
+         [:span.ml-3
+          {:class (when disabled? "text-gray-500")}
+          name]])]
      [:div
       (for [{:speed/keys [name] :as speed} db/SPEEDS]
         ^{:key name}

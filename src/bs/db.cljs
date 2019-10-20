@@ -49,9 +49,8 @@
 ;; Public
 
 (defn new-board []
-  (let [[width _] (u/window-dimensions)
-        cols (min 45 (int (/ width 23)))
-        [w h] [cols (min cols 30)]]
+  (let [[width height] (u/window-dimensions)
+        [w h] (u/vmin [45 30] (map #(int (/ % 23)) [width height]))]
     (-> (board/make w h)
         (board/set-source (u/v* [w h] [(/ 1 3) (/ 1 3)]))
         (board/set-target (u/v* [w h] [(/ 2 3) (/ 2 3)])))))
@@ -114,3 +113,6 @@
 
 (defn cancel-animation! [db]
   (swap! db update :db/animation animation/cancel!))
+
+(defn current-tool [{:db/keys [current-alg tool]}]
+  (if (::alg/weighted? current-alg) tool :tool/wall))

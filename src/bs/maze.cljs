@@ -1,14 +1,12 @@
 (ns bs.maze
-  (:refer-clojure :exclude [rand-nth divide]))
+  (:refer-clojure :exclude [rand-nth divide])
+  (:require [bs.utils :as u]))
 
 (defn- rand-nth [coll]
   (when (seq coll) (clojure.core/rand-nth coll)))
 
 (defn- in-board? [[w h] [x y]]
   (and (<= 0 x (dec w)) (<= 0 y (dec h))))
-
-(defn- plus [[x y] [x' y']]
-  [(+ x x') (+ y y')])
 
 (declare divide)
 
@@ -22,35 +20,35 @@
   (let [wall? (set walls)
         candidates (filter #(and (not (zero? %))
                                  (wall-candidate? board-size wall?
-                                                  (plus [-1 %] offset)
-                                                  (plus [width %] offset)))
+                                                  (u/v+ [-1 %] offset)
+                                                  (u/v+ [width %] offset)))
                            (range (dec height)))
         south-of (rand-nth candidates)
         door-x (rand-int width)
         new-walls (when south-of
                     (for [x (range width) :when (not= door-x x)]
-                      (plus [x south-of] offset)))]
+                      (u/v+ [x south-of] offset)))]
     (as-> (concat walls new-walls) $
       (divide board-size [width south-of] offset $)
       (divide board-size [width (- height south-of 1)]
-              (plus offset [0 (inc south-of)]) $))))
+              (u/v+ offset [0 (inc south-of)]) $))))
 
 (defn- divide-vertically [walls board-size [width height] offset]
   (let [wall? (set walls)
         candidates (filter #(and (not (zero? %))
                                  (wall-candidate? board-size wall?
-                                                  (plus [% -1] offset)
-                                                  (plus [% height] offset)))
+                                                  (u/v+ [% -1] offset)
+                                                  (u/v+ [% height] offset)))
                            (range (dec width)))
         east-of (rand-nth candidates)
         door-y (rand-int height)
         new-walls (when east-of
                     (for [y (range height) :when (not= door-y y)]
-                      (plus [east-of y] offset)))]
+                      (u/v+ [east-of y] offset)))]
     (as-> (concat walls new-walls) $
       (divide board-size [east-of height] offset $)
       (divide board-size [(- width east-of 1) height]
-              (plus offset [(inc east-of) 0]) $))))
+              (u/v+ offset [(inc east-of) 0]) $))))
 
 (defn divide
   "Will return a list of walls (in generation order) that would
@@ -76,7 +74,7 @@
                       (for [y (range (dec height))] [(dec width) (inc y)])
                       (for [x (reverse (range (dec width)))] [x (dec height)])
                       (for [y (reverse (range (- height 2)))] [0 (inc y)]))]
-    (divide [width height] (plus [width height] [-2 -2]) [1 1] walls)))
+    (divide [width height] (u/v+ [width height] [-2 -2]) [1 1] walls)))
 
 (comment
   (defn- ->ascii [w h walls]
