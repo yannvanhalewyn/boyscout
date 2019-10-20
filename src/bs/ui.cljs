@@ -257,8 +257,10 @@
            [:div.text-center.mt-1
             [:button.mx-4.text-white.underline.hover:no-underline
              {:on-click #(db/reset-board! db)
-              :class (when (or animating? (= (:db/board @db)
-                                             (:db/board (db/new-db))))
+              :class (when (or animating?
+                               (and (not (:db/alg-result @db))
+                                    (= (:db/board @db)
+                                       (:db/board (db/new-db)))))
                        "opacity-0")}
              "reset"]]]]
 

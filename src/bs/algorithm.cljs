@@ -37,7 +37,7 @@
          "should be an estimate of the distance from any node to the target. On "
          "this board we use the manhattan distance to direct the A* search.")}
    {::name "Depth First Search"
-    ::short-name "DFS"
+    ::short-name "Depth First"
     ::key ::depth-first
     ::wiki-url "https://en.wikipedia.org/wiki/Depth-first_search"
     ::img-url (u/resource-path "img/depth-first.svg")
@@ -48,7 +48,7 @@
          "possible along each branch before backtracking " "or until it reaches the "
          "target. Because of this, it " "is a bad choice for pathfinding.")}
    {::name "Breadth First Search"
-    ::short-name "BFS"
+    ::short-name "Breadth First"
     ::key ::breadth-first
     ::shortest-path? true
     ::wiki-url "https://en.wikipedia.org/wiki/Breadth-first_search"
