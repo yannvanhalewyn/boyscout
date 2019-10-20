@@ -9,7 +9,7 @@
               [1 0] [1 1]
               [2 0] [2 1]]
              (sut/all-coordinates board)))
-      (is (= #{[0 1] [1 0] [2 1]} (sut/neighbor-coords board [1 1]))))
+      (is (= [[1 0] [2 1] [0 1]] (sut/neighbor-coords board [1 1]))))
 
     (testing "It can mark a position as the source"
       (is (sut/source? (sut/set-source board [1 0]) [1 0])))
@@ -18,10 +18,17 @@
       (is (sut/target? (sut/set-target board [1 0]) [1 0])))))
 
 (deftest walls
-  (testing "It can add walls represented as nodes that have no edge to any neighbors"
-    (let [board (sut/make-wall (sut/make 3 2) [1 1])]
-      (is (empty? (sut/neighbor-coords board [1 1])))
-      (is (sut/wall? board [1 1]))))
+  (let [wall [1 1]
+        board (sut/make-wall (sut/make 3 2) wall)]
+    (testing "It can make a wall"
+      (is (sut/wall? board [1 1])))
+
+    (testing "A wall has no neighbors"
+      (is (empty? (sut/neighbor-coords board wall))))
+
+    (testing "No cell on the board is connected to a wall"
+      (is (not-any? #(contains? (set (sut/neighbor-coords board %)) wall)
+                    (sut/all-coordinates board)))))
 
   (testing "It can remove walls"
     (let [board (sut/make 3 2)
@@ -36,3 +43,19 @@
                     (sut/make-wall [1 0])
                     (sut/destroy-wall [1 0]))]
       (is (not (contains? (sut/neighbor-coords board [1 0]) [1 1]))))))
+
+(deftest weights
+  (let [board (sut/set-weight (sut/make 3 2) [1 1] [1 2] 10)]
+    (testing "It sets a weight on the edge between from and to"
+      (is (= 10 (get (sut/neighbors board [1 1]) [1 2]))))))
+
+(deftest forests
+  (let [board (-> (sut/make 3 2)
+                  (sut/make-forest [1 1])
+                  (sut/make-wall [0 0]))]
+    (testing "It can make a forest"
+      (is (not (sut/forest? board [0 0])))
+      (is (sut/forest? board [1 1])))
+
+    (testing "It sets the weight on every connection from the forest"
+      (is (every? #{sut/FOREST_WEIGHT} (vals (sut/neighbors board [1 1])))))))

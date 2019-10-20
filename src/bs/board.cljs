@@ -1,19 +1,41 @@
 (ns bs.board
   "This namespace provides a model of a board, which is represented as a
-  bi-directional graph of cells. Walls can be added to the edges, and
-  properties of the cell to the nodes. The data representation used
-  for this board might look like this:
+  bi-directional weighted graph of cells. Walls are represented as
+  cells having no connection.
+  The data representation used for this board might look like this:
+
+  S = Source
+  T = Target
+  F = Forest (heavier weight)
+  W = Wall   (no connections to neighbors)
+
+       0   1   2
+     +---+---+---+
+   0 | S | F |   |
+     +---+---+---+
+   1 |   | W | T |
+     +---+---+---+
 
   ``` clojure
-  {:board/width 10
-   :board/height 10
-   :board/source [1 1]
-   :board/target [1 0]
-   :board/edges {[0 0] #{[0 1] [1 0]}
-                 [0 1] #{[1 1] [0 0]}
-                 [1 0] #{[0 0] [1 1]}
-                 [1 1] #{[0 1] [1 0]}}}
+  {:board/width 3
+   :board/height 2
+   :board/source [0 0]
+   :board/target [2 1]
+   :board/edges {[0 0] {[0 1] 1
+                        [1 0] 2}
+                 [0 1] {[0 0] 2
+                        [1 2] 2
+                        [1 1] 2}
+                 [0 2] {[1 0] 2
+                        [2 1] 1}
+                 [1 0] {[0 0] 1}
+                 [1 1] {}
+                 [1 2] {[2 0] 1}}}
   ```")
+
+
+(def DEFAULT_WEIGHT 1)
+(def FOREST_WEIGHT 3)
 
 (defn- in-board?
   "Predicate for wether a position is on the board"
@@ -40,14 +62,17 @@
         board {:board/width width
                :board/height height}]
     (assoc board
-      :board/edges (reduce #(assoc %1 %2 (set (adjacent-coords board %2)))
+      :board/edges (reduce #(assoc %1 %2 (zipmap (adjacent-coords board %2)
+                                                 (repeat DEFAULT_WEIGHT)))
                            {} coords))))
 
 (defn all-coordinates [board]
   (keys (:board/edges board)))
 
-(defn neighbor-coords [board pos]
+(defn neighbors [board pos]
   (get-in board [:board/edges pos]))
+
+(def neighbor-coords (comp keys neighbors))
 
 ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
 ;; Queries
@@ -60,6 +85,10 @@
 
 (defn wall? [board pos]
   (empty? (get-in board [:board/edges pos])))
+
+(defn forest? [board pos]
+  (when-let [weights (seq (vals (neighbors board pos)))]
+    (every? #(not= DEFAULT_WEIGHT %) weights)))
 
 (defn cell-id
   "A unique string id for that cell, useful for say an html-id"
@@ -78,14 +107,30 @@
 (defn make-wall [board pos]
   (let [neighbors (neighbor-coords board pos)]
     (reduce
-     #(update-in %1 [:board/edges %2] disj pos)
-     (assoc-in board [:board/edges pos] #{}) neighbors)))
+     #(update-in %1 [:board/edges %2] dissoc pos)
+     (assoc-in board [:board/edges pos] {}) neighbors)))
+
+(defn set-weight
+  "Sets the weight between from and to"
+  [board from to weight]
+  (assoc-in board [:board/edges from to] weight))
+
+(defn make-forest [board pos]
+  (reduce #(set-weight %1 pos %2 FOREST_WEIGHT)
+          board (neighbor-coords board pos)))
 
 (defn destroy-wall [board pos]
-  (let [neighbors (remove (partial wall? board) (adjacent-coords board pos))]
-    (reduce
-     #(update-in %1 [:board/edges %2] conj pos)
-     (assoc-in board [:board/edges pos] (set neighbors)) neighbors)))
+  (let [weight #(if (forest? board %) FOREST_WEIGHT DEFAULT_WEIGHT)]
+    (->> (adjacent-coords board pos)
+         (remove (partial wall? board))
+         (reduce #(-> %1
+                      (set-weight pos %2 (weight %2))
+                      (set-weight %2 pos DEFAULT_WEIGHT))
+                 board))))
 
-(defn clear-walls [{:board/keys [width height] :as board}]
+(defn unilever "Destroys forests" [board pos]
+  (reduce #(set-weight %1 pos %2 DEFAULT_WEIGHT)
+          board (neighbor-coords board pos)))
+
+(defn reset-edges [{:board/keys [width height] :as board}]
   (assoc board :board/edges (:board/edges (make width height))))

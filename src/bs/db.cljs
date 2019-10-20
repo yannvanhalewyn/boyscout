@@ -83,7 +83,7 @@
         steps (for [w walls]
                 (bs.animation/make-step
                  (board/cell-id w) "cell--wall-animated" ANIMATION_SPEED))
-        empty-board (board/clear-walls board)
+        empty-board (board/reset-edges board)
         db-before (assoc db* :db/board empty-board)
         db-after (assoc (dissoc db* :db/alg-result)
                    :db/board (reduce board/make-wall empty-board walls))]
