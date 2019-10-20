@@ -1,8 +1,10 @@
 (ns bs.board
   "This namespace provides a model of a board, which is represented as a
   bi-directional weighted graph of cells. Walls are represented as
-  cells having no connection.
-  The data representation used for this board might look like this:
+  cells having no connection to any neighbors.
+
+  The data representation used for this board might look like this,
+  given the following board:
 
   S = Source
   T = Target

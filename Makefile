@@ -12,6 +12,9 @@ TARGET_IMG_FILES := $(patsubst $(IMG_DIR)/%, $(BUILD_DIR)/img/%, $(IMG_FILES))
 default: build
 
 repl:
+	shadow-cljs cljs-repl app
+
+dev:
 	shadow-cljs watch app test
 
 css: $(TARGET_CSS_DEV)
