@@ -2,6 +2,11 @@
 
 (defn no-op [& _])
 
+(defn window-dimensions
+  "Returns a vector with [width height] of the window"
+  []
+  [(.-innerWidth js/window) (.-innerHeight js/window)])
+
 (defn add-class! [id class]
   (.. js/document (getElementById id) -classList (add class)))
 
@@ -42,3 +47,8 @@
   grid from [x y] to [x' y']"
   [[x y] [x' y']]
   (+ (abs (- x' x)) (abs (- y' y))))
+
+(defn v*
+  "A 2d vector multiplication"
+  [[x y] [x' y']]
+  [(* x x') (* y y')])

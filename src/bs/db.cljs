@@ -2,11 +2,12 @@
   (:require [bs.algorithm :as alg]
             [bs.animation :as animation]
             [bs.board :as board]
-            [bs.maze :as maze]))
+            [bs.maze :as maze]
+            [bs.utils :as u]))
 
 (def SPEEDS
   [#:speed {:name "Slow" :path 200 :visit 300}
-   #:speed {:name "Fast" :path 40  :visit 7}])
+   #:speed {:name "Fast" :path 50  :visit 10}])
 
 (def TOOLS
   [#:tool {:key :tool/wall   :name "Walls"  :icon-class "cell--wall"}
@@ -47,17 +48,22 @@
 ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
 ;; Public
 
+(defn new-board []
+  (let [[width _] (u/window-dimensions)
+        cols (min 45 (int (/ width 23)))
+        [w h] [cols (min cols 30)]]
+    (-> (board/make w h)
+        (board/set-source (u/v* [w h] [(/ 1 3) (/ 1 3)]))
+        (board/set-target (u/v* [w h] [(/ 2 3) (/ 2 3)])))))
+
 (defn new-db []
-  {:db/board (-> (board/make 45 30)
-                 (board/set-source [15 10])
-                 (board/set-target [30 20]))
+  {:db/board (new-board)
    :db/current-alg (first alg/ALL)
    :db/animation-speed (second SPEEDS)
    :db/tool (:tool/key (first TOOLS))})
 
 (defn reset-board! [db]
-  (swap! db #(assoc (dissoc % :db/alg-result)
-               :db/board (:db/board (new-db)))))
+  (swap! db #(-> % (dissoc :db/alg-result) (assoc :db/board (new-board)))))
 
 (defn hide-error! [db]
   (swap! db assoc :db/error [(first (:db/error @db)) :error/closing])
