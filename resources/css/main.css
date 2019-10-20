@@ -1,7 +1,7 @@
 @tailwind base;
 @tailwind components;
 
-/* ============================================================================
+/* =============================================================================
    UI */
 
 body {
@@ -61,23 +61,7 @@ button, button:focus, button:active {
   }
 }
 
-.max-w-7xl {
-  max-width: 96rem;
-}
-
-.w-72 {
-  width: 18rem;
-}
-
-.h-96 {
-  height: 28rem;
-}
-
-.h-110 {
-  height: 34rem;
-}
-
-/* ============================================================================
+/* =============================================================================
    Board cells and animation */
 
 table {
@@ -114,10 +98,6 @@ table {
   animation: flash 1.5s ease-out alternate forwards;
 }
 
-.cell--forest.cell--visited-animated {
-  animation: flashGreen 1.5s ease-out alternate forwards;
-}
-
 .cell--visited {
   background-color: rgba(0, 190, 218, 0.75);
 }
@@ -146,15 +126,22 @@ table {
   background-color: rgb(12, 53, 71);
 }
 
-.cell--forest-animated {
-  border: none;
-  animation: greenhole 0.3s ease-out alternate forwards;
-  animation-play-state: running;
-}
-
 .cell--forest {
   border: none;
-  @apply bg-green-200
+  background-image: url('../img/tree-1.svg');
+  background-position: center;
+  background-repeat: no-repeat;
+}
+
+.cell--forest-2 {
+  @apply cell--forest;
+  background-image: url('../img/tree-2.svg');
+}
+
+.cell--forest-animated {
+  @apply cell--forest;
+  animation: grow 0.3s ease-out alternate forwards;
+  animation-play-state: running;
 }
 
 @keyframes flash {
@@ -176,27 +163,6 @@ table {
   100% {
     transform: scale(1.0);
     background-color: rgba(0, 190, 218, 0.75);
-  }
-}
-
-@keyframes flashGreen {
-  0% {
-    transform: scale(0.8);
-    @apply bg-green-200;
-  }
-
-  50% {
-    background-color: rgba(17, 104, 217, 0.75);
-  }
-
-  75% {
-    transform: scale(1.2);
-    background-color: rgba(0, 217, 159, 0.75)
-  }
-
-  100% {
-    transform: scale(1.0);
-    @apply bg-green-500;
   }
 }
 
@@ -248,21 +214,27 @@ table {
   }
 }
 
-@keyframes greenhole {
-  0% {
-    transform: scale(.3);
-    @apply bg-green-100
-  }
+/* =============================================================================
+   Utils extensions */
 
-  50% {
-    transform: scale(1.2);
-    @apply bg-green-200
-  }
+.cursor-inherit {
+  cursor: inherit;
+}
 
-  100% {
-    transform: scale(1.0);
-    @apply bg-green-200;
-  }
+.max-w-7xl {
+  max-width: 96rem;
+}
+
+.w-72 {
+  width: 18rem;
+}
+
+.h-96 {
+  height: 28rem;
+}
+
+.h-110 {
+  height: 34rem;
 }
 
 @tailwind utilities;

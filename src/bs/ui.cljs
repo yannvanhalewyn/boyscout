@@ -91,14 +91,14 @@
     [:div.flex.items-center.justify-between.mb-4.pb-3.border-b-2.border-gray-200
      [:div
       (for [[title class tool] [["Walls" "cell--wall" :tool/wall]
-                                ["Forest" "bg-green-200" :tool/forest]]]
+                                ["Forest" "cell--forest" :tool/forest]]]
         ^{:key title}
         [:button.px-4.py-1.tracking-wider
          {:class (if (= current-tool tool)
                    "text-gray-700 font-bold border rounded-lg cursor-default"
-                   "text-gray-600 hover:text-gray-700")
+                   "text-gray-600 hover:text-gray-700 cursor-pointer")
           :on-click #(swap! db assoc :db/tool tool)}
-         [:i.inline-block.cell.w-4.h-4.rounded.align-middle {:class class}]
+         [:i.inline-block.cell.w-4.h-4.rounded.align-middle.cursor-inherit {:class class}]
          [:span.ml-3 title]])]
      [:div
       (for [[speed selected?] [["Slow" false] ["Fast" true]]]

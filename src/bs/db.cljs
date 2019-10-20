@@ -39,7 +39,8 @@
    :db/current-alg (first alg/ALL)})
 
 (defn reset-board! [db]
-  (reset! db (assoc (new-db) :db/current-alg (:db/current-alg @db))))
+  (swap! db #(assoc (dissoc % :db/alg-result)
+               :db/board (:db/board (new-db)))))
 
 (defn hide-error! [db]
   (swap! db assoc :db/error [(first (:db/error @db)) :error/closing])
