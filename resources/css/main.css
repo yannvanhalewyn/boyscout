@@ -1,6 +1,5 @@
 @tailwind base;
 @tailwind components;
-@tailwind utilities;
 
 /* ============================================================================
    UI */
@@ -11,14 +10,6 @@ body {
 
 button, button:focus, button:active {
   outline: none;
-}
-
-.link {
-  @apply cursor-pointer underline text-blue-600
-}
-
-.link:hover {
-  @apply text-blue-300
 }
 
 .font-logo {
@@ -124,7 +115,7 @@ table {
 }
 
 .cell--path-animated {
-  animation: glow 1.5s linear alternate forwards;
+  animation: glow 1.3s linear alternate forwards;
 }
 
 .cell--path {
@@ -216,3 +207,5 @@ table {
     background-color: rgb(12, 53, 71);
   }
 }
+
+@tailwind utilities;

@@ -132,8 +132,9 @@
               [:span.pl-3.font-bold.text-base "Stop"]]
              [:button.btn.text-lg.bg-white.text-teal-600.font-bold.hover:bg-teal-600.hover:text-white
               {:on-click #(db/animate-alg! db)}
-              (str "Visualize " (or (::alg/short-name current-alg)
-                                    (::alg/name current-alg)))])
+              (str "Run " (or (::alg/short-name current-alg)
+                              (::alg/name current-alg)))
+              [:i.mdi.mdi-graph.ml-2]])
            [:div.text-center.mt-1
             [:button.mx-4.text-white.underline.hover:no-underline
              {:on-click #(db/reset-board! db)

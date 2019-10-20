@@ -34,8 +34,8 @@
 
 (defn new-db []
   {:db/board (-> (board/make 45 30)
-                 (board/set-source [10 10])
-                 (board/set-target [30 15]))
+                 (board/set-source [12 18])
+                 (board/set-target [19 27]))
    :db/current-alg (first alg/ALL)})
 
 (defn reset-board! [db]
@@ -72,7 +72,7 @@
                        visitation-order)
                   (map #(mk-step % "cell--path-animated" 4 "cell--source")
                        path))
-       @db (assoc @db :db/alg-result result) 1400))))
+       @db (assoc @db :db/alg-result result) 1000))))
 
 (defn generate-maze!
   "Generates a maze, clears the board's walls and kicks-off a maze animation"
