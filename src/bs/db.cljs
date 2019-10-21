@@ -32,10 +32,10 @@
   (alg/process (::alg/key current-alg) board))
 
 (defn- run-animation!
-  [db steps speed db-before db-after & [done-timeout]]
-  (let [done-fn #(reset! db (assoc db-after :db/animation %))]
-    (reset! db (assoc db-before :db/animation
-                      (bs.animation/start! steps speed done-fn done-timeout)))))
+  [db steps speed & {:keys [db-before db-after-fn done-timeout]}]
+  (let [done-fn #(reset! db (assoc (db-after-fn @db) :db/animation %))
+        animation (bs.animation/start! steps speed done-fn done-timeout)]
+    (reset! db (assoc db-before :db/animation animation))))
 
 (defn- animation-steps [{::alg/keys [visitation-order path]}]
   (concat
@@ -92,7 +92,9 @@
     (if (empty? (::alg/path result))
       (show-error! db "Target is unreachable")
       (run-animation! db (animation-steps result) (:speed/ms animation-speed)
-                      db* (assoc db* :db/alg-result result) 1000))))
+                      :db-before db*
+                      :db-after-fn #(assoc % :db/alg-result result)
+                      :done-timeout 1000))))
 
 (defn generate-maze!
   "Generates a maze, clears the board's walls and kicks-off a maze animation"
@@ -102,11 +104,11 @@
         walls (remove #{source target} (maze/recursive-division width height))
         steps (for [w walls]
                 (bs.animation/make-step (board/cell-id w) "cell--wall-animated"))
-        empty-board (board/reset-edges board)
-        db-before (assoc db* :db/board empty-board)
-        db-after (assoc (dissoc db* :db/alg-result)
-                   :db/board (reduce board/make-wall empty-board walls))]
-    (run-animation! db steps (:speed/ms animation-speed) db-before db-after)))
+        empty-board (board/reset-edges board)]
+    (run-animation! db steps (:speed/ms animation-speed)
+                    :db-before (assoc db* :db/board empty-board)
+                    :db-after-fn #(assoc (dissoc % :db/alg-result)
+                                    :db/board (reduce board/make-wall empty-board walls)))))
 
 (defn animating? [db]
   (animation/running? (:db/animation db)))
