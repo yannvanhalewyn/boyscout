@@ -6,14 +6,13 @@
             [bs.utils :as u]))
 
 (def SPEEDS
-  [#:speed {:name "Slow" :path 200 :visit 300}
-   #:speed {:name "Fast" :path 50  :visit 10}])
+  {:speed/slow   {:speed/name "Slow"   :speed/ms 300}
+   :speed/medium {:speed/name "Medium" :speed/ms 130}
+   :speed/fast   {:speed/name "Fast"   :speed/ms 8}})
 
 (def TOOLS
   [#:tool {:key :tool/wall   :name "Walls"  :icon-class "cell--wall"}
    #:tool {:key :tool/forest :name "Forest" :icon-class "cell--forest"}])
-
-(def DEFAULT_SPEED (second SPEEDS))
 
 (defn- recalculate-alg?
   "Wether or not the algorithm output should be recalculated. This
@@ -33,18 +32,18 @@
   (alg/process (::alg/key current-alg) board))
 
 (defn- run-animation!
-  [db steps db-before db-after & [done-timeout]]
+  [db steps speed db-before db-after & [done-timeout]]
   (let [done-fn #(reset! db (assoc db-after :db/animation %))]
     (reset! db (assoc db-before :db/animation
-                      (bs.animation/start! steps done-fn done-timeout)))))
+                      (bs.animation/start! steps speed done-fn done-timeout)))))
 
-(defn- animation-steps [{::alg/keys [visitation-order path]} animation-speed]
+(defn- animation-steps [{::alg/keys [visitation-order path]}]
   (concat
    (map #(animation/make-step (board/cell-id %) "cell--visited-animated"
-                              (:speed/visit animation-speed) "cell--animation-current")
+                              1 "cell--animation-current")
         visitation-order)
    (map #(animation/make-step (board/cell-id %) "cell--path-animated"
-                              (:speed/path animation-speed) "cell--source")
+                              4 "cell--source")
         path)))
 
 ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
@@ -60,7 +59,7 @@
 (defn new-db []
   {:db/board (new-board)
    :db/current-alg (first alg/ALL)
-   :db/animation-speed DEFAULT_SPEED
+   :db/animation-speed (:speed/fast SPEEDS)
    :db/tool (:tool/key (first TOOLS))})
 
 (defn reset-board! [db]
@@ -92,29 +91,32 @@
         result (process-alg db*)]
     (if (empty? (::alg/path result))
       (show-error! db "Target is unreachable")
-      (run-animation! db (animation-steps result animation-speed)
+      (run-animation! db (animation-steps result) (:speed/ms animation-speed)
                       db* (assoc db* :db/alg-result result) 1000))))
 
 (defn generate-maze!
   "Generates a maze, clears the board's walls and kicks-off a maze animation"
   [db]
-  (let [{:db/keys [board] :as db*} @db
+  (let [{:db/keys [board animation-speed] :as db*} @db
         {:board/keys [width height source target]} board
         walls (remove #{source target} (maze/recursive-division width height))
         steps (for [w walls]
-                (bs.animation/make-step (board/cell-id w) "cell--wall-animated"
-                                        (:speed/visit DEFAULT_SPEED)))
+                (bs.animation/make-step (board/cell-id w) "cell--wall-animated"))
         empty-board (board/reset-edges board)
         db-before (assoc db* :db/board empty-board)
         db-after (assoc (dissoc db* :db/alg-result)
                    :db/board (reduce board/make-wall empty-board walls))]
-    (run-animation! db steps db-before db-after)))
+    (run-animation! db steps (:speed/ms animation-speed) db-before db-after)))
 
 (defn animating? [db]
   (animation/running? (:db/animation db)))
 
 (defn cancel-animation! [db]
   (swap! db update :db/animation animation/cancel!))
+
+(defn change-animation-speed! [db speed]
+  (animation/set-speed! (:db/animation @db) (:speed/ms speed))
+  (swap! db assoc :db/animation-speed speed))
 
 (defn current-tool [{:db/keys [current-alg tool]}]
   (if (::alg/weighted? current-alg) tool :tool/wall))

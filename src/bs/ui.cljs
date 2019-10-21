@@ -115,13 +115,13 @@
           {:class (when disabled? "text-gray-500")}
           name]])]
      [:div
-      (for [{:speed/keys [name] :as speed} db/SPEEDS]
+      (for [{:speed/keys [name] :as cur} (vals db/SPEEDS)]
         ^{:key name}
         [:button.mr-3.px-1.text-gray-500
-         {:class (if (= speed animation-speed)
+         {:class (if (= animation-speed cur)
                    "text-blue-600 font-bold border-b-2 border-blue-600 cursor-default"
                    "text-gray-500 hover:text-gray-600")
-          :on-click #(swap! db assoc :db/animation-speed speed)}
+          :on-click #(db/change-animation-speed! db cur)}
          name])]]))
 
 ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
