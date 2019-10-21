@@ -89,8 +89,9 @@
 (defn wall? [board pos]
   (empty? (get-in board [:board/edges pos])))
 
-(defn forest? [board pos]
-  (when-let [weights (seq (vals (neighbors board pos)))]
+(defn forest? [{:board/keys [edges] :as board} pos]
+  (when-let [weights (seq (map #(get-in edges [% pos])
+                               (neighbor-coords board pos)))]
     (every? #(not= DEFAULT_WEIGHT %) weights)))
 
 (defn cell-id
@@ -119,7 +120,9 @@
   (assoc-in board [:board/edges from to] weight))
 
 (defn make-forest [board pos]
-  (update-in board [:board/edges pos] u/map-vals (constantly FOREST_WEIGHT)))
+  (->> (neighbor-coords board pos)
+       (remove (partial wall? board))
+       (reduce #(set-weight %1 %2 pos FOREST_WEIGHT) board)))
 
 (defn destroy-wall [board pos]
   (let [weight #(if (forest? board %) FOREST_WEIGHT DEFAULT_WEIGHT)]
@@ -131,7 +134,7 @@
                  board))))
 
 (defn unilever "Destroys forests" [board pos]
-  (reduce #(set-weight %1 pos %2 DEFAULT_WEIGHT)
+  (reduce #(set-weight %1 %2 pos DEFAULT_WEIGHT)
           board (neighbor-coords board pos)))
 
 (defn reset-edges [{:board/keys [width height] :as board}]

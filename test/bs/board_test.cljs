@@ -57,5 +57,16 @@
       (is (not (sut/forest? board [0 0])))
       (is (sut/forest? board [1 1])))
 
-    (testing "It sets the weight on every connection from the forest"
-      (is (every? #{sut/FOREST_WEIGHT} (vals (sut/neighbors board [1 1])))))))
+    (testing "It sets the weight from every neighbor to the forest cell"
+      (is (every? #{sut/FOREST_WEIGHT}
+                  (map #(get (sut/neighbors board %) [1 1])
+                       (sut/neighbor-coords board [1 1])))))
+
+    (testing "It can remove forests"
+      (is (not (sut/forest? (sut/unilever board [1 1]) [1 1]))))
+
+    (testing "It can remove forests without killing it's neighbor forests"
+      (is (-> board
+              (sut/make-forest [1 0])
+              (sut/unilever [1 1])
+              (sut/forest? [1 0]))))))
