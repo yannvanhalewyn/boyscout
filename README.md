@@ -20,10 +20,6 @@ Clone the repo and the first time run:
     $ yarn install
     $ make css
 
-This project uses [shadow-cljs](https://github.com/thheller/shadow-cljs) to build clojurescript. Make sure it is installed globally with:
-
-    $ yarn global add shadow-cljs
-
 Then to start and watch the test and dev build and start a nRepl server:
 
     $ make dev
