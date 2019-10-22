@@ -66,8 +66,8 @@ button, button:focus, button:active {
 
 .cell {
   cursor: crosshair;
-  width: 22px;
-  height: 22px;
+  width: 25px;
+  height: 25px;
   border-width: 1px;
   border-color: rgb(175, 216, 248);
 }

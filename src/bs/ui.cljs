@@ -165,7 +165,7 @@
    [:div.bg-white.max-w-7xl.mx-auto.rounded.shadow-lg.z-50.overflow-y-auto
 
     ;; Header
-    [:h1.text-3xl.py-4.px-10.text-indigo-900.shadow.bg-gray-200 "Pick algorithm"]
+    [:h1.text-3xl.py-4.px-10.text-teal-900.shadow.bg-gray-200 "Pick algorithm"]
 
     [:div.py-4.text-left.px-6
      [:div.flex
@@ -175,14 +175,14 @@
         ;; Algorithm option
         ^{:key key}
         [:div.w-72.p-4.pb-12.m-2.relative.cursor-default.text-gray-900
-         {:class (when selected? " bg-indigo-500 rounded")}
+         {:class (when selected? " bg-teal-500 rounded")}
          [:img.float-right.pl-4.w-32.h-32 {:src img-url}]
          [:h1.text-xl.font-bold
-          {:class (when selected? "text-indigo-100")}
+          {:class (when selected? "text-teal-100")}
           name]
          [:p.font-serif.mb-24.mt-2.leading-relaxed.tracking-wide
           {:class (if selected?
-                    "text-indigo-200"
+                    "text-teal-200"
                     "text-gray-700")}
           description]
 
@@ -195,7 +195,7 @@
               [:div.py-1.px-2.text-sm.border.rounded.text-gray-200 [:span "SELECTED"]]]
              [:<>
               [:div.my-6 [modal-checkmarks alg "text-gray-800"]]
-              [:button.px-3.py-2.shadow-xl.shadow-inner.bg-indigo-600.tracking-wider.rounded.text-white.hover:bg-indigo-400
+              [:button.px-3.py-2.shadow-xl.shadow-inner.bg-teal-600.tracking-wider.rounded.text-white.hover:bg-teal-400
                {:on-click #(on-change alg)}
                "Select"]])]]])]
 
