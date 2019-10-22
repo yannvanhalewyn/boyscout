@@ -86,15 +86,17 @@
                                  path? "cell--path"
                                  visited? "cell--visited"}
                           :when (f board pos)] v)
-             :style (when animating? {:cursor "wait"})
+             :style (cond animating? {:cursor "wait"}
+                          drag-target {:transition "none"})
              :on-mouse-down (when-not animating? #(start-drag! pos))
              :on-mouse-enter #((:drag/move drag-handler u/no-op) db pos)
              :on-mouse-up end-drag!}])])]]))
 
-(defn alg-summary [{:db/keys [current-alg alg-result board]}]
+(defn alg-summary [{:db/keys [current-alg alg-result board drag-target]}]
   (when-let [{::alg/keys [path visitation-order]} alg-result]
     ^{:key current-alg}
     [:div.animate-grow-later.mt-3.text-sm.text-blue-500.tracking-wider
+     {:style (when drag-target {:animation "none"})}
      [:i.mdi.mdi-chevron-right]
      "Visited "
      [:span.font-bold.text-blue-700 (count visitation-order)]

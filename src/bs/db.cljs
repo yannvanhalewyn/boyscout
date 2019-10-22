@@ -51,7 +51,7 @@
 
 (defn new-board []
   (let [[width height] (u/window-dimensions)
-        [w h] (u/vmin [40 28] (map #(int (/ % 30)) [width height]))]
+        [w h] (u/vmin [40 27] (map #(int (/ % 30)) [width height]))]
     (-> (board/make w h)
         (board/set-source (map int (u/v* [w h] [(/ 2 5) (/ 2 5)])))
         (board/set-target (map int (u/v* [w h] [(/ 3 5) (/ 3 5)]))))))
