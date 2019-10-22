@@ -91,6 +91,19 @@
              :on-mouse-enter #((:drag/move drag-handler u/no-op) db pos)
              :on-mouse-up end-drag!}])])]]))
 
+(defn alg-summary [{:db/keys [current-alg alg-result board]}]
+  (when-let [{::alg/keys [path visitation-order]} alg-result]
+    ^{:key current-alg}
+    [:div.animate-grow-later.mt-3.text-sm.text-blue-500.tracking-wider
+     [:i.mdi.mdi-chevron-right]
+     "Visited "
+     [:span.font-bold.text-blue-700 (count visitation-order)]
+     " cells to find a path of cost "
+     ;; Algorithms should definitely return the cost of the path but I'm lazy RN
+     (let [[forest normal] (u/split-by (partial board/forest? board) path)]
+       [:span.font-bold.text-blue-700 (+ (* board/DEFAULT_WEIGHT (count normal))
+                                         (* board/FOREST_WEIGHT (count forest)))])]))
+
 ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
 ;; Toolbar
 

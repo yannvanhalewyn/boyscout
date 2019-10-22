@@ -20,7 +20,8 @@
       [ui/sidebar db]]
      [:div.px-3 {:class "lg:w-3/5 xl:w-2/3"}
       [ui/toolbar db]
-      [ui/board-table db]]]]
+      [ui/board-table db]
+      [ui/alg-summary @db]]]]
    [:div.right-0.py-3.mr-20
     [:a.float-right.px-4.pb-1.pt-2.font-semibold.rounded.tracking-wider.shadow.align-middle.text-gray-800.hover:bg-white
      {:style {:line-height "34px"}

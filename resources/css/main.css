@@ -42,6 +42,10 @@ button, button:focus, button:active {
   animation: pulsing 0.8s linear alternate infinite;
 }
 
+.animate-grow-later {
+  animation: grow-later 0.8s cubic-bezier(0.9, 0.35, 0.6, 0.93);
+}
+
 @keyframes appear {
   0% {
     opacity: 0;
@@ -70,6 +74,7 @@ button, button:focus, button:active {
   height: 25px;
   border-width: 1px;
   border-color: rgb(175, 216, 248);
+  transition: background-color 0.4s ease-in-out;
 }
 
 .cell--wall-animated {
@@ -175,6 +180,27 @@ button, button:focus, button:active {
     transform: scale(1.0);
   }
 }
+
+@keyframes grow-later {
+  0% {
+    opacity: 0;
+  }
+
+  50% {
+    opacity: 0;
+    transform: scale(.3);
+  }
+
+  75% {
+    transform: scale(1.1);
+  }
+
+  100% {
+    opacity: 1;
+    transform: scale(1.0);
+  }
+}
+
 
 @keyframes glow {
   0% {
