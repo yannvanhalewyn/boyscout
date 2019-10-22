@@ -114,6 +114,12 @@
          [:span.ml-3
           {:class (when disabled? "text-gray-500")}
           name]])]
+     [:button.text-blue-700 (when-not (db/animating? @db)
+                              {:class "cursor-pointer underline hover:text-blue-500"
+                               :on-click #(db/generate-maze! db)})
+      [:i.mdi.mdi-tent.text-3xl]
+      [:h1.ml-2.inline-block.font-logo.font-bold.text-3xl.tracking-widest
+       "Boyscout"]]
      [:div
       (for [{:speed/keys [name] :as cur} (vals db/SPEEDS)]
         ^{:key name}
@@ -236,7 +242,7 @@
           ;; Body
           [:div
            [:img.float-left.p-2.pl-0.mt-4.w-24.h-24 {:src (::alg/img-url current-alg)}]
-           [:p.mt-4.font-serif.text-justify.text-teal-200.leading-loose
+           [:p.mt-4.text-teal-100.leading-loose
             (::alg/description current-alg) " "
             [:a.cursor-pointer.underline.text-teal-300.hover:text-teal-100
              {:href (::alg/wiki-url current-alg) :target "_blank"}
