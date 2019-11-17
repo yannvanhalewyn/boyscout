@@ -30,76 +30,43 @@
                  [2 1] #{[2 0]}}}
   ```")
 
-(defn- in-board?
-  "Predicate for wether a position is on the board"
-  [width height [x y]]
-  (and (<= 0 x (dec width)) (<= 0 y (dec height))))
-
-(defn- adjacent-coords
-  "Returns all coords that are adjecent to pos and are inside the
-  board."
-  ([{:board/keys [width height]} pos]
-   (adjacent-coords width height pos))
-  ([width height [x y]]
-   (filter (partial in-board? width height)
-           [[x (dec y)]
-            [(inc x) y]
-            [x (inc y)]
-            [(dec x) y]])))
-
 ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
-;; Graph
+;; Board graph
 
-(defn make
-  "Makes a new board of given width and height, and where adjacent
-  cells are connected."
-  [width height]
-  (let [coords (set (mapcat #(map vector (repeat %) (range height)) (range width)))]
-    {:board/width width
-     :board/height height
-     :board/edges (reduce #(assoc %1 %2 (set (adjacent-coords width height %2)))
-                          {} coords)}))
+(defn make [width height]
+  ;; Steps needed and pseudo code:
+  ;; 1. Generate all coordinates in a board of width and height
+  ;;    tips:
+  ;;      - (range width) will give you a range between 0 and width-1.
+  ;;      - For (range width), generate a tuple of [width h] for every
+  ;;        height in (range height)
+  ;; 2. Given a point, what are it's neighbors?
+  ;;    (neighboring-coords [1 1]) => [[1 0] [2 1] [1 3] [0 1]]
+  ;; 3. Filter the neighbors that are outside of the board
+  ;;    (in-board? width height [-1 0]) => false
+  ;;    (in-board? 10 10 [11 11])       => false
+  ;;    (in-board? 10 10 [4 3])         => true
+  ;; 4. Build the edges as a map from every coordinate to it's neighbors.
+  ;;    (reduce
+  ;;      (fn [edges pos]
+  ;;        (assoc edges pos (adjacent-coords pos))
+  ;;      {} all-coords)
+  )
 
-(defn all-coordinates [board]
-  (keys (:board/edges board)))
-
-(defn neighbor-coords [board pos]
-  (get-in board [:board/edges pos]))
+(defn all-coordinates [board])
+(defn neighbor-coords [board pos])
 
 ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
 ;; Queries
 
-(defn source? [board pos]
-  (= pos (:board/source board)))
-
-(defn target? [board pos]
-  (= pos (:board/target board)))
-
-(defn wall? [board pos]
-  (empty? (get-in board [:board/edges pos])))
-
-(defn cell-id
-  "A unique string id for that cell, useful for say an html-id"
-  [[x y]]
-  (str "cell-" x "-" y))
+(defn source? [board pos])
+(defn target? [board pos])
+(defn wall? [board pos])
 
 ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
 ;; Mutations
 
-(defn set-source [board pos]
-  (assoc board :board/source pos))
-
-(defn set-target [board pos]
-  (assoc board :board/target pos))
-
-(defn make-wall [board pos]
-  (let [neighbors (neighbor-coords board pos)]
-    (reduce
-     #(update-in %1 [:board/edges %2] disj pos)
-     (assoc-in board [:board/edges pos] #{}) neighbors)))
-
-(defn destroy-wall [board pos]
-  (let [neighbors (remove (partial wall? board) (adjacent-coords board pos))]
-    (reduce
-     #(update-in %1 [:board/edges %2] conj pos)
-     (assoc-in board [:board/edges pos] (set neighbors)) neighbors)))
+(defn set-source [board pos])
+(defn set-target [board pos])
+(defn make-wall [board pos])
+(defn destroy-wall [board pos])
