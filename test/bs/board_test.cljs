@@ -2,14 +2,24 @@
   (:require [bs.board :as sut]
             [clojure.test :refer [deftest testing is]]))
 
-(deftest board
+(deftest making-a-board
   (let [board (sut/make 3 2)]
-    (testing "Make returns a board as a graph of w * h where all cells are connected"
+    (testing "It makes a board of given width and height"
       (is (= #{[0 0] [1 0] [2 0]
                [0 1] [1 1] [2 1]}
-             (set (sut/all-coordinates board))))
+             (set (sut/all-coordinates board)))))
+
+    (testing "It makes a board where all neighboring cells are connected"
       (is (= #{[1 0] [2 1] [0 1]} (sut/neighbor-coords board [1 1]))))
 
+    (testing "It has a width and a height"
+      (is (= 3 (:board/width board))))
+
+    (testing "It has a height"
+      (is (= 2 (:board/height board))))))
+
+(deftest setting-source-and-target
+  (let [board (sut/make 3 2)]
     (testing "It can mark a position as the source"
       (is (sut/source? (sut/set-source board [1 0]) [1 0])))
 
