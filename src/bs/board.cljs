@@ -78,6 +78,11 @@
 (defn wall? [board pos]
   (empty? (get-in board [:board/edges pos])))
 
+(defn cell-id
+  "A unique string id for that cell, useful for say an html-id"
+  [[x y]]
+  (str "cell-" x "-" y))
+
 ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
 ;; Mutations
 

@@ -1,12 +1,17 @@
 (ns bs.core
-  (:require [reagent.core :as r]))
+  (:require [bs.board :as board]
+            [bs.ui :as ui]
+            [reagent.core :as r]))
 
-(defonce db (r/atom {}))
+(defn new-db []
+  {:db/board (-> (board/make 30 20)
+                 (board/set-source [10 5])
+                 (board/set-target [20 15]))})
 
 (defn root [db]
-  [:div "I don't do much, yet"])
+  [ui/board-table db])
 
 (defn ^:dev/after-load render! []
-  (r/render [root db] (.getElementById js/document "app")))
+  (r/render [root (r/atom (new-db))] (.getElementById js/document "app")))
 
 (def main! render!)
