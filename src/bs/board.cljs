@@ -33,24 +33,19 @@
 ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
 ;; Board graph
 
+(defn- in-board? [width height [x y]])
+(defn- adjacent-coords [width height [x y]])
+
 (defn make [width height]
   ;; Steps needed and pseudo code:
   ;; 1. Generate all coordinates in a board of width and height
   ;;    tips:
   ;;      - (range width) will give you a range between 0 and width-1.
-  ;;      - For (range width), generate a tuple of [width h] for every
-  ;;        height in (range height)
-  ;; 2. Given a point, what are it's neighbors?
-  ;;    (neighboring-coords [1 1]) => [[1 0] [2 1] [1 3] [0 1]]
+  ;;      - For every width (range width), generate a tuple of [width h]
+  ;;        for every height in (range height)
+  ;; 2. For every point, what are it's neighbors?
   ;; 3. Filter the neighbors that are outside of the board
-  ;;    (in-board? width height [-1 0]) => false
-  ;;    (in-board? 10 10 [11 11])       => false
-  ;;    (in-board? 10 10 [4 3])         => true
-  ;; 4. Build the edges as a map from every coordinate to it's neighbors.
-  ;;    (reduce
-  ;;      (fn [edges pos]
-  ;;        (assoc edges pos (adjacent-coords pos))
-  ;;      {} all-coords)
+  ;; 4. Build the edges as a map from every coordinate to a set of it's neighbors.
   )
 
 (defn all-coordinates [board])

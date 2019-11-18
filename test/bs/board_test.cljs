@@ -2,6 +2,28 @@
   (:require [bs.board :as sut]
             [clojure.test :refer [deftest testing is]]))
 
+(deftest in-board?-helper-test-for-workshop
+  (testing "a point in the board"
+    (is (true? (#'sut/in-board? 10 10 [5 5]))))
+
+  (testing "a point with negative dimensions"
+    (is (false? (#'sut/in-board? 10 10 [-1 0])))
+    (is (false? (#'sut/in-board? 10 10 [0 -1]))))
+
+  (testing "a point outside of the width and height"
+    (is (false? (#'sut/in-board? 10 10 [20 20])))
+    (is (false? (#'sut/in-board? 10 10 [10 5])))
+    (is (false? (#'sut/in-board? 10 10 [5 10])))))
+
+(deftest adjacent-coords-helper-test-for-workshop
+  (testing "returns the four adjacent points"
+    (is (= #{[1 0] [2 1] [1 2] [0 1]}
+           (set (#'sut/adjacent-coords 5 5 [1 1])))))
+
+  (testing "won't return points outside the board"
+    (is (= #{[3 4] [4 3]} (set (#'sut/adjacent-coords 5 5 [4 4]))))
+    (is (= #{[0 1] [1 0]} (set (#'sut/adjacent-coords 5 5 [0 0]))))))
+
 (deftest making-a-board
   (let [board (sut/make 3 2)]
     (testing "It makes a board of given width and height"
