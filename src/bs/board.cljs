@@ -54,11 +54,12 @@
   "Makes a new board of given width and height, and where adjacent
   cells are connected."
   [width height]
-  (let [coords (set (mapcat #(map vector (repeat %) (range height)) (range width)))]
-    {:board/width width
-     :board/height height
-     :board/edges (reduce #(assoc %1 %2 (set (adjacent-coords width height %2)))
-                          {} coords)}))
+  {:board/width width
+   :board/height height
+   :board/edges (into {} (for [y (range height)
+                               x (range width)
+                               :let [pos [x y]]]
+                           [pos (adjacent-coords width height pos)]))})
 
 (defn all-coordinates [board]
   (keys (:board/edges board)))
