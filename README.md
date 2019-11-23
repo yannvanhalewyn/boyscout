@@ -2,7 +2,7 @@
 
 Boyscout is a Clojurescript rewrite of Clement Mihailescu's [Pathfinding Visualizer](https://github.com/clementmihailescu/Pathfinding-Visualizer/). All credit's for the idea and sexy animations sould go to him 🎓. Boyscout can visualize a couple of famous pathfinding algorithms for fun and educational purpouses.
 
-View Boyscout in action on: [https://yannvanhalewyn.github.io/boyscout/](https://yannvanhalewyn.github.io/boyscout/) and after playing around a bit click on 'maze' in the header for a hidden feature 😉.
+View Boyscout in action on: [https://yannvanhalewyn.github.io/boyscout/](https://yannvanhalewyn.github.io/boyscout/) and after playing around a bit click on the Boyscout logo in the header for a hidden feature 😉.
 
 This project has been built to practice algorithms, demonstrate the power of a declarative functional approach and most importantly to have some fun.
 
