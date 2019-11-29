@@ -108,10 +108,12 @@
   (assoc board :board/target pos))
 
 (defn make-wall [board pos]
-  (let [neighbors (neighbor-coords board pos)]
-    (reduce
-     #(update-in %1 [:board/edges %2] dissoc pos)
-     (assoc-in board [:board/edges pos] nil) neighbors)))
+  (if (or (source? board pos) (target? board pos))
+    board
+    (let [neighbors (neighbor-coords board pos)]
+      (reduce
+       #(update-in %1 [:board/edges %2] dissoc pos)
+       (assoc-in board [:board/edges pos] nil) neighbors))))
 
 (defn set-weight
   "Sets the weight between from and to"

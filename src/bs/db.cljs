@@ -104,8 +104,7 @@
         board (-> board
                   (board/set-source [0 (-> height (- 2) rand-int inc)])
                   (board/set-target [(dec width) (rand-int height)]))
-        {:board/keys [source target]} board
-        walls (remove #{source target} (maze/recursive-division width height))
+        walls (maze/recursive-division width height)
         steps (for [w walls]
                 (bs.animation/make-step (board/cell-id w) "cell--wall-animated"))
         empty-board (board/reset-edges board)]
