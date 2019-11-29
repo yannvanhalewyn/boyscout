@@ -1,7 +1,8 @@
 (ns bs.board
   "This namespace provides a model of a board, which is represented as a
   bi-directional weighted graph of cells. Walls are represented as
-  cells having no connection to any neighbors.
+  not being a node in the graph. This is to differentiate between
+  existing nodes that have no connections and walls.
 
   The data representation used for this board might look like this,
   given the following board:
@@ -31,10 +32,8 @@
                  [0 2] {[1 0] 2
                         [2 1] 1}
                  [1 0] {[0 0] 1}
-                 [1 1] {}
                  [1 2] {[2 0] 1}}}
-  ```"
-  (:require [bs.utils :as u]))
+  ```")
 
 
 (def DEFAULT_WEIGHT 1)
@@ -86,8 +85,8 @@
 (defn target? [board pos]
   (= pos (:board/target board)))
 
-(defn wall? [board pos]
-  (empty? (get-in board [:board/edges pos])))
+(defn wall? [{:keys [board/edges]} pos]
+  (nil? (get edges pos)))
 
 (defn forest? [{:board/keys [edges] :as board} pos]
   (when-let [weights (seq (map #(get-in edges [% pos])
@@ -112,7 +111,7 @@
   (let [neighbors (neighbor-coords board pos)]
     (reduce
      #(update-in %1 [:board/edges %2] dissoc pos)
-     (assoc-in board [:board/edges pos] {}) neighbors)))
+     (assoc-in board [:board/edges pos] nil) neighbors)))
 
 (defn set-weight
   "Sets the weight between from and to"
@@ -125,7 +124,8 @@
        (reduce #(set-weight %1 %2 pos FOREST_WEIGHT) board)))
 
 (defn destroy-wall [board pos]
-  (let [weight #(if (forest? board %) FOREST_WEIGHT DEFAULT_WEIGHT)]
+  (let [weight #(if (forest? board %) FOREST_WEIGHT DEFAULT_WEIGHT)
+        board (assoc-in board [:board/edges pos] {})]
     (->> (adjacent-coords board pos)
          (remove (partial wall? board))
          (reduce #(-> %1
