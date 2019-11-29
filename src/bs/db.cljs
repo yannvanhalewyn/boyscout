@@ -100,7 +100,11 @@
   "Generates a maze, clears the board's walls and kicks-off a maze animation"
   [db]
   (let [{:db/keys [board animation-speed] :as db*} @db
-        {:board/keys [width height source target]} board
+        {:board/keys [width height]} board
+        board (-> board
+                  (board/set-source [0 (-> height (- 2) rand-int inc)])
+                  (board/set-target [(dec width) (rand-int height)]))
+        {:board/keys [source target]} board
         walls (remove #{source target} (maze/recursive-division width height))
         steps (for [w walls]
                 (bs.animation/make-step (board/cell-id w) "cell--wall-animated"))
